@@ -1,0 +1,25 @@
+{
+  "arxiv_id": "1706.03762",
+  "title": "Attention Is All You Need",
+  "authors": [
+    "Ashish Vaswani",
+    "Noam Shazeer",
+    "Niki Parmar",
+    "Jakob Uszkoreit",
+    "Llion Jones",
+    "Aidan N. Gomez",
+    "Lukasz Kaiser",
+    "Illia Polosukhin"
+  ],
+  "abstract": "The dominant sequence transduction models are based on complex recurrent or\nconvolutional neural networks in an encoder-decoder configuration. The best\nperforming models also connect the encoder and decoder through an attention\nmechanism. We propose a new simple network architecture, the Transformer, based\nsolely on attention mechanisms, dispensing with recurrence and convolutions\nentirely. Experiments on two machine translation tasks show these models to be\nsuperior in quality while being more parallelizable and requiring significantly\nless time to train. Our model achieves 28.4 BLEU on the WMT 2014\nEnglish-to-German translation task, improving over the existing best results,\nincluding ensembles by over 2 BLEU. On the WMT 2014 English-to-French\ntranslation task, our model establishes a new single-model state-of-the-art\nBLEU score of 41.8 after training for 3.5 days on eight GPUs, a small fraction\nof the training costs of the best models from the literature. We show that the\nTransformer generalizes well to other tasks by applying it successfully to\nEnglish constituency parsing both with large and limited training data.",
+  "categories": [
+    "cs.CL",
+    "cs.LG"
+  ],
+  "published": "2017-06-12T17:57:34+00:00",
+  "updated": "2023-08-02T00:41:18+00:00",
+  "pdf_url": "https://arxiv.org/pdf/1706.03762.pdf",
+  "comment": "15 pages, 5 figures",
+  "journal_ref": null,
+  "doi": null
+}

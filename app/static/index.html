@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>arXiv Document Processor</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-brain"></i>
+                    <h1>arXiv Document Processor</h1>
+                </div>
+                <div class="header-actions">
+                    <button id="toggleTheme" class="btn-icon" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <a href="/docs" target="_blank" class="btn-secondary">
+                        <i class="fas fa-book"></i>
+                        API Docs
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Process New Paper Section -->
+            <section class="process-section">
+                <div class="section-header">
+                    <h2>Process arXiv Paper</h2>
+                    <p>Enter an arXiv ID to download, analyze, and generate AI-powered summaries</p>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-container">
+                        <i class="fas fa-search input-icon"></i>
+                        <input 
+                            type="text" 
+                            id="arxivInput" 
+                            placeholder="Enter arXiv ID (e.g., 1706.03762, 2010.11929)"
+                            autocomplete="off"
+                        >
+                        <button id="processBtn" class="btn-primary">
+                            <i class="fas fa-magic"></i>
+                            Process Paper
+                        </button>
+                    </div>
+                    <div class="input-help">
+                        <span>Examples: <code>1706.03762</code> (Transformer), <code>2010.11929</code> (Vision Transformer)</span>
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+                <div id="progressSection" class="progress-section hidden">
+                    <div class="progress-header">
+                        <h3 id="progressTitle">Processing Paper...</h3>
+                        <button id="cancelBtn" class="btn-danger-small">
+                            <i class="fas fa-times"></i>
+                            Cancel
+                        </button>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="progressBar" class="progress-bar"></div>
+                        <span id="progressText">0%</span>
+                    </div>
+                    <div id="progressStage" class="progress-stage">Initializing...</div>
+                    <div id="progressDetails" class="progress-details"></div>
+                </div>
+            </section>
+
+            <!-- Tabs Navigation -->
+            <div class="tabs-container">
+                <div class="tabs-nav">
+                    <button class="tab-btn active" data-tab="history">
+                        <i class="fas fa-history"></i>
+                        Processing History
+                    </button>
+                    <button class="tab-btn" data-tab="viewer">
+                        <i class="fas fa-file-alt"></i>
+                        Document Viewer
+                    </button>
+                </div>
+            </div>
+
+            <!-- History Tab -->
+            <section id="historyTab" class="tab-content active">
+                <div class="section-header">
+                    <h2>Processing History</h2>
+                    <div class="history-controls">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch" placeholder="Search papers...">
+                        </div>
+                        <button id="refreshHistory" class="btn-secondary">
+                            <i class="fas fa-refresh"></i>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div id="historyContainer" class="history-container">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading history...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Document Viewer Tab -->
+            <section id="viewerTab" class="tab-content">
+                <div id="documentViewer" class="document-viewer">
+                    <div class="viewer-placeholder">
+                        <i class="fas fa-file-alt"></i>
+                        <h3>No Document Selected</h3>
+                        <p>Select a paper from the history to view its processed content</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Toast Notifications -->
+        <div id="toastContainer" class="toast-container"></div>
+
+        <!-- Modals -->
+        <!-- Document Modal -->
+        <div id="documentModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Document Title</h3>
+                    <button class="modal-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="modalContent" class="document-content"></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="exportBtn" class="btn-secondary">
+                        <i class="fas fa-download"></i>
+                        Export
+                    </button>
+                    <button class="btn-secondary modal-close">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Status Indicator -->
+        <div id="aiStatus" class="ai-status">
+            <i class="fas fa-robot"></i>
+            <span>AI Features: <span id="aiStatusText">Checking...</span></span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

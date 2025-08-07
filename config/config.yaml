@@ -1,0 +1,35 @@
+storage:
+  base_path: "./data"
+  cache_duration: 86400  # 24 hours in seconds
+  max_file_size_mb: 50
+
+arxiv:
+  api_base_url: "https://export.arxiv.org/api/query"
+  pdf_base_url: "https://arxiv.org/pdf"
+  rate_limit: 0.33  # 3 requests per second max (being conservative)
+  timeout: 30
+  max_results: 10
+
+anthropic:
+  model: "claude-3-opus-20240229"
+  max_tokens: 4096
+  temperature: 0.3
+  section_chunk_size: 3000  # tokens per section for summarization
+
+processing:
+  max_pdf_size_mb: 50
+  chunk_size: 1000  # tokens per section for summarization
+  max_concurrent_tasks: 5
+  
+server:
+  host: "0.0.0.0"
+  port: 8000
+  reload: true
+  cors_origins:
+    - "http://localhost:8000"
+    - "http://127.0.0.1:8000"
+  
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/app.log"

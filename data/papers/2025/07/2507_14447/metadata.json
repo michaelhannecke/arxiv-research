@@ -1,0 +1,33 @@
+{
+  "arxiv_id": "2507.14447",
+  "title": "Routine: A Structural Planning Framework for LLM Agent System in   Enterprise",
+  "authors": [
+    "Guancheng Zeng",
+    "Xueyi Chen",
+    "Jiawang Hu",
+    "Shaohua Qi",
+    "Yaxuan Mao",
+    "Zhantao Wang",
+    "Yifan Nie",
+    "Shuang Li",
+    "Qiuyang Feng",
+    "Pengxu Qiu",
+    "Yujia Wang",
+    "Wenqiang Han",
+    "Linyan Huang",
+    "Gang Li",
+    "Jingjing Mo",
+    "Haowen Hu"
+  ],
+  "abstract": "The deployment of agent systems in an enterprise environment is often\nhindered by several challenges: common models lack domain-specific process\nknowledge, leading to disorganized plans, missing key tools, and poor execution\nstability. To address this, this paper introduces Routine, a multi-step agent\nplanning framework designed with a clear structure, explicit instructions, and\nseamless parameter passing to guide the agent's execution module in performing\nmulti-step tool-calling tasks with high stability. In evaluations conducted\nwithin a real-world enterprise scenario, Routine significantly increases the\nexecution accuracy in model tool calls, increasing the performance of GPT-4o\nfrom 41.1% to 96.3%, and Qwen3-14B from 32.6% to 83.3%. We further constructed\na Routine-following training dataset and fine-tuned Qwen3-14B, resulting in an\naccuracy increase to 88.2% on scenario-specific evaluations, indicating\nimproved adherence to execution plans. In addition, we employed Routine-based\ndistillation to create a scenario-specific, multi-step tool-calling dataset.\nFine-tuning on this distilled dataset raised the model's accuracy to 95.5%,\napproaching GPT-4o's performance. These results highlight Routine's\neffectiveness in distilling domain-specific tool-usage patterns and enhancing\nmodel adaptability to new scenarios. Our experimental results demonstrate that\nRoutine provides a practical and accessible approach to building stable agent\nworkflows, accelerating the deployment and adoption of agent systems in\nenterprise environments, and advancing the technical vision of AI for Process.",
+  "categories": [
+    "cs.AI",
+    "cs.CL"
+  ],
+  "published": "2025-07-19T02:46:19+00:00",
+  "updated": "2025-07-22T10:01:32+00:00",
+  "pdf_url": "https://arxiv.org/pdf/2507.14447.pdf",
+  "comment": "26 pages, 8 figures, 5 tables",
+  "journal_ref": null,
+  "doi": null
+}

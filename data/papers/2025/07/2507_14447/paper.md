@@ -1,0 +1,1345 @@
+# Routine: A Structural Planning Framework for LLM Agent System in   Enterprise
+
+**Authors**: Guancheng Zeng, Xueyi Chen, Jiawang Hu, Shaohua Qi, Yaxuan Mao, Zhantao Wang, Yifan Nie, Shuang Li, Qiuyang Feng, Pengxu Qiu, Yujia Wang, Wenqiang Han, Linyan Huang, Gang Li, Jingjing Mo, Haowen Hu
+**arXiv ID**: 2507.14447
+**Published**: 2025-07-19
+**Categories**: cs.AI, cs.CL
+**Keywords**: multi-step agent planning, tool-calling tasks, Routine-based distillation, execution stability, parameter passing, execution accuracy, scenario-specific evaluations, tool-usage patterns, improved execution accuracy, LLM agent systems, autonomous agents, agent workflows
+
+## AI Summary
+The paper "Routine: A Structural Planning Framework for LLM Agent System in Enterprise" addresses the challenge of deploying reliable and effective large language model (LLM) based agent systems in enterprise-specific scenarios, where common planning models often fail to generate robust execution plans and select appropriate tools due to a lack of domain knowledge. The authors propose Routine, a structured planning framework that enables agents to refine procedure details and transform them into well-formatted natural language instructions, significantly improving the execution accuracy and stability of language models like GPT-4 and Qwen3-14B in real-world enterprise scenarios. The key contributions include the Routine framework itself, a synthesized training dataset for enhancing Routine distillation, and the generation of domain-specific, multi-step tool-calling datasets via Routine-based distillation. The Routine mechanism has significant implications for improving the adaptability of agent systems to enterprise scenarios, allowing AI to more effectively assist in executing enterprise processes and realizing the technical vision of AI for Process. This research advances the field of LLM-based agent systems and provides a practical approach to accelerating their deployment and adoption in enterprise environments.
+
+## Original Abstract
+The deployment of agent systems in an enterprise environment is often
+hindered by several challenges: common models lack domain-specific process
+knowledge, leading to disorganized plans, missing key tools, and poor execution
+stability. To address this, this paper introduces Routine, a multi-step agent
+planning framework designed with a clear structure, explicit instructions, and
+seamless parameter passing to guide the agent's execution module in performing
+multi-step tool-calling tasks with high stability. In evaluations conducted
+within a real-world enterprise scenario, Routine significantly increases the
+execution accuracy in model tool calls, increasing the performance of GPT-4o
+from 41.1% to 96.3%, and Qwen3-14B from 32.6% to 83.3%. We further constructed
+a Routine-following training dataset and fine-tuned Qwen3-14B, resulting in an
+accuracy increase to 88.2% on scenario-specific evaluations, indicating
+improved adherence to execution plans. In addition, we employed Routine-based
+distillation to create a scenario-specific, multi-step tool-calling dataset.
+Fine-tuning on this distilled dataset raised the model's accuracy to 95.5%,
+approaching GPT-4o's performance. These results highlight Routine's
+effectiveness in distilling domain-specific tool-usage patterns and enhancing
+model adaptability to new scenarios. Our experimental results demonstrate that
+Routine provides a practical and accessible approach to building stable agent
+workflows, accelerating the deployment and adoption of agent systems in
+enterprise environments, and advancing the technical vision of AI for Process.
+
+## Header
+
+### AI Summary
+The paper titled "Routine: A Structural Planning Framework for LLM Agent System in Enterprise" is authored by Guancheng Zeng, Xueyi Chen, Jiawang Hu, and several other researchers from Digital China AI Research. The paper likely introduces a new framework called "Routine" designed for structuring and planning large language model (LLM) based agent systems in enterprise settings.
+
+### Original Content
+Routine: A Structural Planning Framework for LLM
+Agent System in Enterprise
+GuanchengZeng∗1,XueyiChen∗,JiawangHu∗,ShaohuaQi∗,YaxuanMao,ZhantaoWang,Yifan
+Nie,ShuangLi,QiuyangFeng,PengxuQiu,YujiaWang,WenqiangHan,LinyanHuang,GangLi,
+JingjingMo,andHaowenHu†2
+DigitalChinaAIResearch
+{cenggc1,huhwa2}@digitalchina.com
+
+## Abstract
+
+### AI Summary
+This paper introduces Routine, a multi-step agent planning framework designed to guide AI agents in performing complex tasks within enterprise environments. By providing a clear structure and explicit instructions, Routine significantly improves the execution accuracy and stability of language models like GPT-4 and Qwen3-14B in real-world enterprise scenarios. The framework also enables the creation of scenario-specific, multi-step tool-calling datasets through distillation, further enhancing model adaptability and performance in new situations.
+
+### Original Content
+Thedeploymentofagentsystemsinanenterpriseenvironmentisoftenhindered
+byseveralchallenges: commonmodelslackdomain-specificprocessknowledge,
+leadingtodisorganizedplans,missingkeytools,andpoorexecutionstability. To
+addressthis,thispaperintroducesRoutine,amulti-stepagentplanningframework
+designed with a clear structure, explicit instructions, and seamless parameter
+passingtoguidetheagent’sexecutionmoduleinperformingmulti-steptool-calling
+taskswithhighstability. Inevaluationsconductedwithinareal-worldenterprise
+scenario, Routine significantly increases the execution accuracy in model tool
+calls,increasingtheperformanceofGPT-4ofrom41.1%to96.3%,andQwen3-
+14Bfrom32.6%to83.3%. WefurtherconstructedaRoutine-followingtraining
+datasetandfine-tunedQwen3-14B,resultinginanaccuracyincreaseto88.2%on
+scenario-specificevaluations,indicatingimprovedadherencetoexecutionplans.
+Inaddition,weemployedRoutine-baseddistillationtocreateascenario-specific,
+multi-step tool-calling dataset. Fine-tuning on this distilled dataset raised the
+model’saccuracyto95.5%,approachingGPT-4o’sperformance. Theseresults
+highlightRoutine’seffectivenessindistillingdomain-specifictool-usagepatterns
+and enhancing model adaptability to new scenarios. Our experimental results
+demonstratethatRoutineprovidesapracticalandaccessibleapproachtobuilding
+stableagentworkflows,acceleratingthedeploymentandadoptionofagentsystems
+inenterpriseenvironments,andadvancingthetechnicalvisionofAIforProcess.
+
+## Introduction
+
+### AI Summary
+This paper addresses the challenge of implementing reliable and effective LLM-based agent systems in enterprise-specific scenarios, where common planning models often fail to generate robust execution plans and select appropriate tools due to a lack of scenario-specific knowledge and insufficient tool descriptions. The authors propose Routine, a structured planning framework that enables agents to refine procedure details and transform them into well-formatted natural language instructions, significantly improving the accuracy of tool calling and problem-solving in scenario-specific tasks, thus addressing the limitations of current agent planning approaches.
+
+### Original Content
+Theemergenceofautonomousagentshasgivenrisetotheactivedevelopmentofvariousframeworks
+and functional modules in industry, bringing diverse structures and capabilities to the field [1].
+Since both research and real-world practice have progressed, agent architectures have gradually
+converged towards more stable designs. A typical agent system consists of four key modules:
+planning,execution,tools,andmemory;theycollaboratetoaccomplishcomplextasksandmaintain
+coherentinteractionswithusers[2]. Thesemodulesaretypicallydrivenbylargelanguagemodels
+(LLMs),whichenableagentstoadapttocommonscenariosandperformtaskssuchasdataanalysis,
+report summarization, and web interface manipulation with strong generalization and generative
+capabilities[3,4,5]. Numeroushigh-performingandinnovativeagentapplicationshaveemerged,
+demonstratingthepotentialofLLM-basedagentsystemsinpracticaluse[6].
+∗Equalcontribution.
+†CorrespondingAuthor
+Preprint.Underreview.
+5202
+luJ
+]IA.sc[
+2v74441.7052:viXra
+However, inenterprise-specificscenarios, itisstillhardtoimplementagentsystemsduetotheir
+inabilitytointegratereliablywithscenario-specifictoolsandeffectivelysolvereal-worldtasks[7].
+Commonplanningmodelsoftenfailtogeneraterobustexecutionplansandtendtooverlookessential
+tools–particularlythoseinvolvingpermissionverificationandmodelgeneration–duetothelackof
+scenario-specificknowledge[8]. Thisissueisfurthercompoundedbyinsufficienttooldescriptionsin
+real-worldscenarios,makingitdifficultformodelstoselecttheappropriatetoolsandparameters,
+leading to instability in task execution [9]. Additionally, current agent planning lacks a unified,
+structured,andcompleteformat[8,10,11]. Asaresult,agentsoftenpassedincustomformatstothe
+executionmodule,whichmustinfertool-callinginstructionswithoutclearstructuralguidance[12].
+Thisambiguityleadstomismatchbetweenplanningstepsandtoolcalls. Whilelow-codeplatforms
+offeramorestablealternative,theystilldependheavilyonmanualeffort,limitingtheefficiencyof
+workflowdevelopment[13,14].
+Inthispaper,weproposeRoutine[15],astructuredplanningframeworkforagentstoaddressthe
+aboveissues;themechanismisshowninFigure1[8,16]. Givenaplanningpromptfromanexpert,
+theplanningmodelrefinesdetailsoftheprocedureandtransformsthemintoawell-formattednatural
+languageRoutine,whichisthenpassedtotheexecutionmodeltoperformmulti-steptoolcalling
+and solve user problems. In experiments, GPT-4o achieved an overall accuracy of 96.3% on the
+scenario-specifictestsetwithRoutineplanning,significantlyoutperformingitsaccuracyof41.1%
+withoutRoutine. Similarly, Qwen3-14B’sperformanceimprovedfrom32.6%to83.3%withthe
+incorporationofRoutine.
+Furthermore, we synthesized a total of
+4,209 common training data with Rou-
+tine generation based on an open multi-
+tooldataset3. Aftertraining,Qwen3-14B
+achievedanaccuracyof88.2%,furtherim-
+provingitsRoutineinstruction-following
+capability. Additionally, we performed
+datadistillationbasedonRoutineinrealen-
+terprisescenarios,generating537scenario-
+specific, single-turn, multi-step tool call-
+ing samples. Qwen3-14B trained on this
+distilled dataset achieved an accuracy of
+95.5% on the test set, approaching GPT-
+4o’s96.3%,demonstratingthepotentialof
+using Routine-based distillation to adapt Figure1. ThemechanismofRoutineguidinganLLM
+executionmodelstoaspecificprocess. agentthroughmulti-steptoolcalls
+Insummary,ourcontributionsinclude:
+1. WeproposeRoutine,awell-formattedplanningframeworkthatimprovesthestabilityofmulti-
+steptoolcallinginagentsystemswithinenterprisescenarios;
+2. WegenerateaRoutine-complianttrainingdatasetandfine-tunedmodelstoimprovetheexecution
+module’sabilitytofollowplanninginstructions;
+3. We conduct Routine-based knowledge distillation to generate a scenario-specific multi-tool
+dataset,whichimprovestheaccuracyoftheexecutionmodel.
+TheseresultsdemonstratetheeffectivenessofRoutineinenhancingthestabilityandaccuracyof
+agentsystemsinsolvingcomplexproblemswithinspecificscenarios.
+
+## 2 RelatedWork
+
+### AI Summary
+This section discusses the evolution of LLM-based agent systems, from early exploratory frameworks to more recent production-oriented architectures. It introduces Routine, a structured planning script that serves as an intermediate representation between LLM-generated plans and execution engines, aimed at enhancing the instruction-following capabilities of these systems. The section also briefly touches on the increasing focus on instruction-following in LLMs and the need for more comprehensive evaluation protocols.
+
+### Original Content
+2.1 AgentPlanningandExecutionFramework
+LLMsandagentshaveintroducedpotentialmethodsforenterprisestoimproveoperationalefficiency,
+particularlybyenablingintelligentautomationanddecisionsupport[17]. TheinitialwaveofLLM-
+basedagentpracticefrom2023to2024wasmarkedbytheemergenceofseveralexploratorysystems
+suchasAutoGPT,atasklist–drivenautonomousagent[18],BabyAGI,ataskmanagercapableof
+3https://github.com/PKU-Baichuan-MLSystemLab/BUTTON
+dynamicgoalgenerationandprioritization[19],andAutoGen,amulti-agentframeworkthatleverages
+GraphFlow to model execution as a DAG of tool calls, ensuring traceable and reliable process
+flows[20]. Collectively,thesesystemsunderscoredthefeasibilityofusingLLMsforautonomous
+reasoning,taskdecomposition,andmulti-steptoolorchestration. Atthesametime,theseprojects
+highlightedlimitationsinearlyarchitectures,includinginefficienciesincontextmanagement[21],
+fragmentedexecutionflows[21],andvariabilityintaskcompletionsuccessrates[22]–particularly
+stemmingfromstepexplosionandsubstantialvariabilityinrunningcostcausedbyfrequentexecution
+loops[23,24].
+In response to these limitations, a second wave of LLM-based agent development emerged in
+2025,shiftingtheresearchfocustoimproveagent’sstability,reliability,andenterpriseapplicability.
+Representative systems adopted production-oriented agent architectures featuring modular and
+collaborativedesigns[25,26]. Thesesystemsfollowedaplan-then-actparadigm,whereinhigh-level
+taskplanningprecedesthedynamicselectionandexecutionoftoolsforindividualsubtasks[27,28].
+Thisparadigmpreservesexecutionflexibilitywhiledisciplineplanning,markingasignificantstep
+towardpracticalandcontrollableagentsystemsforreal-worlddeployment. Forexample,Manus
+employsathree-stagepipeline,Planner,ExecutorandVerifier,toensureaccuracyandtraceability[25].
+Despitetheseadvancements, manyexistingsystemsstillrepresentplansinunstructuredorsemi-
+structurednaturallanguage,whichhampersverification,debugging,andreuseofprocess[29,30].
+In practice, this introduces ambiguity during execution, hinders static validation, and limits the
+agent’sabilitytotrackintermediatestatesorrecoverfromfailure. Toaddressthesechallenges,we
+proposeRoutine—-astructuredplanningscriptthatservesasanintermediaterepresentationbetween
+LLM-generatedplansandexecutionengines,enhancingtheexecutionmodel’sinstruction-following
+capability.
+2.2 Instruction-FollowingCapabilitiesofLLMs
+Theincreaseinmodelsizeemergesthein-contextlearningabilitiesofLLMs[31]. Byproviding
+task-specificrulesandoutputconstraintsinthesystemprompt,anLLMcaninterpretinstructions
+andadapttoconcretetasks. Aspromptengineeringrevealssubstantialpracticalvalue,researchers
+increasinglyfocusoninstruction-following,givingrisetospecializedtrainingschemesandevaluation
+protocols[32,33,34].
+GoogleDeepMindintroducedIFEval[35],whichprovides25verifiableinstructionsand500prompts,
+providing a standardized baseline. However, its coverage of task chains, state dependence, and
+compositeconstraintsremainslimited. Totranscendthisflatevaluationsurface,TsinghuaUniver-
+sityproposedComplexBench[36]. Bycombiningchain,parallel,andnestedstructuresacross19
+constraintdimensions,ComplexBenchshowsthatGPT-4’saccuracydropsmarkedlyonchainstruc-
+turesanddeeplynestedchoices,highlightingweaknessesinstructuralawarenessanddistributional
+generalization.
+To strengthen alignment under complex constraints, Tongyi Lab proposed IOPO (Input–Output
+PreferenceOptimization)andreleasedtheTRACEbenchmark[37]. IOPOjointlymodelspreference
+pairsfrominstructionandresponse,yieldingsignificantgainsondifficultinstruction-followingtasks.
+ByteDancebuiltGuideBench[31],introducingguidelinerulesthatemulatedynamicallyevolving
+domain regulations. Experiments show that mainstream LLMs still struggle with fine-grained,
+domain-specificrules. Asanalternative,contextengineeringoffersalightweightwaytoimprove
+modelcompliancebystructuringpromptsandaddingtask-relevantcues. However,manualdesigns
+remainimpracticalandstrugglewithdeeplystructuredorbranchingtasks4.
+RoutinewasfirstintroducedintheOpenAICookbook[15]. AccordingtotheCookbook,Routine
+enablesthedecompositionofinstructionsintosmaller,manageabletasks,therebyreducingtherisk
+ofhallucinationsinLLMsandfacilitatingmoreeffectivecustomerservicesolutions. inourresearch,
+weaddedmorecomponentstoRoutineandfurtheroptimizeditsstructure,andwealsofocusedmore
+onthemodel’sproceduralinstruction-followingability. Byprovidingthemodelwithastructured
+Routineformatthatexplicitlyencodestheentireworkflow,weimproveitsstabilityinfollowingthe
+prescribedplan. ConstructingatrainingsetthatpairsinputswiththisRoutinerepresentationfurther
+enhancesthemodel’sabilitytogenerateoutputsthatconformtotherequiredstructure.
+4https://github.com/davidkimai/Context-Engineering
+Figure 2. Framework of our Routine-based agent system. To begin, the system uses expert-
+annotatedplanningpromptstogenerateRoutines. Duringruntime,itprocessesuserinputandsystem
+parameters,completingtasksthroughtheinteractionbetweenthemodules,andultimatelyprovidesa
+finalsummarybasedontheobservationfromadedicatedsummarizationtool.
+2.3 ToolCallingDataSynthesisandPost-Training
+TrainingdataqualityandstructurearecrucialtotheperformanceofLLM.However,thecollectionof
+high-quality,human-annotatedscenario-specificdatasetsentailssubstantiallaborcosts. Acommon
+strategytotacklethisissueistopromptLLMstosynthesizetrainingdata,whichissubsequentlyused
+toenhancemodelperformancethroughtargetedpost-training[38]. Intoolcalling,datasynthesis
+pipelinesareessentialforconsistencyandeffectiveness. Tothisend,severalstudieshaveproposed
+datasetgenerationframeworks[39,40,41,42]. Beyondtheseefforts,Kimi-k2introducedascalable
+automated pipeline to simulate real-world multi-turn tool-use scenarios and generate large-scale,
+diverse,andhigh-qualitytrainingdatasets[43]. Theseframeworksprimarilyfocusongenerating
+tool-callingdatasetstoimprovemodels’abilitytoreadinputsandproducestandardizedtoolcalling
+commands,ensuringconsistentoutputoftoolcallinginstructionsalignedwithcommonlyaccepted
+structuralconventionsintheecosystem.
+Despitetheseadvances,commontool-usemodelsstillunder-performinscenario-specificscenarios.
+Whiletheymaintainconsistentoutputformatting,theyoftenstruggletoselectthecorrectfunctionsor
+parametersduetoalackofscenario-specificknowledge[38]. Promptengineeringandconstructing
+scenario-basedtrainingdatasetsusingknowledgedistillationcanbeusedtoaddresstheissue[44].
+Distillingexpertknowledgeabouttoolselectionandparameterconfigurationintosmallermodels
+enableslightweightexpertagentstosolvescenario-specifictasks.
+Buildingonpriorworkinenterprise-leveltoolcalling,wepreviouslydevelopedatrainingpipeline
+toimprovesingle-stepfunctionexecutionbygeneratingtask-specificdatabasedonacuratedtool
+list[45]. Thepresentstudyextendsthatworkbyfocusingonmulti-steptoolcallingcapabilities.
+
+## 3 AgentSystemFramework
+
+### AI Summary
+This section introduces a framework for an LLM-based agent system centered around Routines, which are structured plans comprising a series of steps to guide the agent in handling specific tasks. Each step in a Routine contains information such as a name, description, input/output parameters, and the tool to be used. Routines can incorporate branching steps and execution conditions to merge similar scenarios into a single workflow, allowing the agent to determine its current position and branch within the overall process.
+
+### Original Content
+Anagentsystemtypicallycomprisesfourcoremodulesthatcollaborateonsoleusertasks: Planning,
+Execution,Tools,andMemory[2]. Whenataskisreceived,thePlanningModulegeneratesa
+step-by-stepplan. TheExecutionModulethenfollowsthisplan,generatingtheappropriatetool
+callinstructionforeachstep. TheToolModulereceivestheseinstructionsandreturnstheexecution
+results [46]. The Memory Module assists the entire agent, improving execution coherence and
+enhancinggeneration. BasedonourRoutineandotheroptimizationmechanisms,wehaveredesigned
+thesefourprimarymodulestocreateanagentsystemcenteredaroundRoutinesandmulti-steptool
+callingmechanism. TheoverallarchitectureofthissystemisshowninFigure2. Inthissection,we
+willintroducehowwedesignthesefunctionalmodules.
+3.1 PlanningModuleandRoutine
+Inoursystem,themainpurposeofRoutineistoenhancethestabilityofcommonmodelsinhandling
+scenario-specifictasks,therebyimprovingthemodel’sinstruction-followingcapabilitiestoincrease
+executionaccuracy.
+Table1. ThecomponentsofaRoutine. Note:Componentsmarkedwith*areoptionalelements.
+Component Description
+StepNumber Thesequentialnumberofthestepwithinthemainprocess.
+StepName Aconcisesummaryofthestep’spurposeorfunction.
+StepDescription Detailedinstructions,executionconditions,andobjectivesofthestep.
+InputDescription* Adescriptionoftheparametersrequiredforexecutingthisstep.
+OutputDescription* Theoutputparametersgeneratedaftersuccessfulexecution.
+StepTool* Thecorrespondingfunctiontoolusedinthisstep;onlyonetooliscalled.
+3.1.1 RoutineComponentsandFormat
+A Routine is composed of multiple specific execution steps of sub-tasks, which are independent
+yetofteninterrelated. Therefore,aRoutineexecutionsequencemustcontainsufficientinformation
+fortheagenttoreliablyfollowtheplannedsteps. ThecomponentsofacompleteRoutineandtheir
+descriptionsforasub-tasksamplearedescribedinTable 1.
+Routines for similar scenarios may contain overlapping steps, differing only in certain process
+segments,similartodifferentbranchesofthesameworkflow. Insuchcases,similarscenarioscanbe
+mergedbycreatingbranchingstepsandexecutingconditionstodifferentiatebetweentheworkflows
+inonesingleRoutine.
+HereisanexampleofaRoutinewithbranches:
+StepX.<StepName>:Thisstepperformsabranchconditioncheck:
+• BranchX-1Step1. <StepName>: If<Condition>,perform<StepDescription>,usingthe<Tool
+Name>tool;
+• BranchX-1Step2.<StepName>:<StepDescription>,usingthe<ToolName>tool;
+• BranchX-2Step1. <StepName>: If<Condition>,perform<StepDescription>,usingthe<Tool
+Name>tool;
+StepY.<StepName>:<StepDescription>,usingthe<ToolName>tool;
+StepZ.<StepName>:<StepDescription>,usingthe<ToolName>tool,andterminatetheworkflow;
+Forinstance,abranchcanbedenotedas"BranchX-nStepi",representingthei-thstepwithinthen-th
+branchofmainstepX.Basedonthisnotation,theexecutionmodelcandetermineitscurrentbranch
+andpositionwithintheworkflow. Whenaworkflowterminatesafteracertainstep, thismustbe
+describedintheRoutineaccordingly. Thisstructuredformatensuresthateachplanningstepcontains
+clearandcompleteinformation,facilitatingprogresstrackingandtaskexecutionfortheagent. When
+aworkflowneedstobemodified,developerscanquicklyinsert,delete,oreditsteps,allowingfor
+agileadjustmentstothetaskplan. AnexampleofaRoutinecanbefoundintheAppendixB.
+Figure3. AIOptimizationandManagementofRoutines
+3.1.2 AI-PoweredRoutineGenerationandOptimization
+Whilegeneral-purposemodelscaneffectivelydeconstructproblemsintonaturallanguageRoutinesin
+open-endedscenarios,theystruggleinenterprisecontextsduetoalackofdomain-specificknowledge.
+ThismakesitdifficultforthemtodirectlyandreliablygeneratecontextualizedRoutineswithout
+assistancefromdomainexpertsorenterprisedocumentation.
+Toimproveefficiency,anexpertcanprovideasimpledraftpromptoutliningtheplanofaspecific
+scenario. Thisdraftisthenoptimizedbyamodelequippedwithaspecializedprompttemplate. The
+optimizationprocessinvolvesdecomposingtheplanintodetailedsub-steps,mappingthesestepsto
+availabletools,andfinallyoutputtingastructuredandcomprehensivenaturallanguageRoutinethat
+iseasyfortheexecutionmoduletofollow. TheoverallprocessingflowisshowninFigure3. The
+prompttemplateforthisAI-drivenoptimizationcanbefoundintheAppendixA.
+3.2 ExecutionModuleandSmall-ScaleLLMs
+Theagent’sExecutionModuleisresponsibleforreceivingtheplanprovidedbythePlanningModule
+andfollowingitsprescribedpathtooutputtoolcallinginstructions. Inmostagentsystems, both
+planning and execution are handled by the same model. Due to the diversity and complexity of
+tasks,planningoftenrequireshighperformanceandconsumessignificantcomputationalpowerand
+inferencetime,requiringtheuseoflarge-scalemodels[47].
+However,inenterprise-levelagentsystems,theexecutionprocessbringsalargeamountofcontext,
+includingnumerousdecisionnodesandavailabletools. Usingahigh-performancemodelforeach
+execution step consumes substantial resources and time, making it difficult to deploy in a real
+enterpriseenvironment[48].
+FortheExecutionModule,thecorerequiredcapabilitiesaremulti-steptoolcallingandinstruction
+following,ratherthancomplexlogicalreasoningorabstraction. Therefore,theExecutionModulecan
+bedrivenbyasmaller,specializedinstruction-followingmodel. Thismodelisonlyresponsiblefor
+followingtheplanfromtheplanningmodelandoutputtingthecorrespondingtoolcallinginstructions.
+The execution model does not generate natural language responses; instead, a final summary is
+generatedbyadedicatedsummarizationtoolinthelaststep[49]. Thisseparationensuresthatthe
+prompttemplatesforsummarizationandtoolcallingdonotinterferewitheachother.
+Byprovidingapredefinedplan,anExecutionModulepoweredbyasmallspecializedmodelcansave
+significantresources,thusimprovingitsviabilityforreal-worldenterpriseagentapplications[50].
+3.3 ToolModuleandMCPServer
+TheToolModuleisresponsibleforreceivingtoolcallinginstructionsfromtheExecutionModule,
+usingthesetoolstoperformtasks,andreturningtheexecutionresults,therebyprovidingtheagent
+systemwithexternalinformation. Inoursystem,weuseMCPserversastheToolModule. TheMCP
+servernotonlyservesastheresourcefortheExecutionModulebutalsodefinesandmanagestheset
+oftoolsavailabletotheagent 5.
+MCPdefinestoolsinastructuredmannerwithitsprotocol. Eachtoolisuniformlydescribedbythis
+protocol,whichspecifiesitsname,parametertypes,andcallingconstraints. Theexecutionmodule
+simply retrieves the target function from the MCP tool set by step-by-step instructions from the
+PlanningModuleandfillsintherequiredparameters. Thisprotocol-basedstructurenolongerneeds
+tomanagetheimplementationdetailsofthetools. Consequently,theExecutionModuleonlyneeds
+todetermine"whichtooltocall"and"whatparameterstopass"basedontheplanprovidedbythe
+PlanningModule[51].
+Furthermore,thestandardizeddesignoftheToolModuleprovidesthesystemwithextremelyhigh
+extensibility,makingiteasyfordeveloperstoaddnewfunctionsorconnectwithnewsystems. This
+allowsforadiverseecosystemoftools,includingvariousfunctions,models,otheragents,oreven
+userresponsestoassisttheagent.
+Inenterprisescenarioswithawidevarietyofcomplexandinteractivetools,theMCPToolModule
+effectivelydecouplestheexecutionlogicfromthetoollayer,creatingacleardivisionoflabor: the
+Tool Module provides stable and reliable function standards and interfaces, while an Execution
+Moduledrivenbyasmall-scalemodelcallsthesetoolsstep-by-step[50].
+3.4 MemoryModule: ProceduresandVariables
+Agentsystemstypicallyprocessalargevolumeofcontext,includingsystemprompts,listsofavailable
+tools,andconversationhistory[52]. Thisimposesasignificantloadonthemodel: increasedcontext
+notonlyleadstohigherinferencecostsbutalsodecreasesthemodel’sattentionalaccuracy. This
+requiresaspecializedmemorystorageandretrievalmechanismthatprovidestheagentwithonlythe
+mostrelevantinformationforthecurrenttask[53].
+Inouragentsystem,wehaveimplementedtwoformsofmemory: long-termProcedureMemory
+andshort-termVariableMemory.
+3.4.1 ProcedureMemory
+ThroughtheAI-drivenRoutinegenerationandoptimizationprocess,thePlanningModulecreatesa
+collectionofRoutinesneededforagivenscenarioincollaborationwithdomainexperts. Eachgroup
+ofRoutinesinthiscollectionisdesignedtohandleaspecificsub-task. Sinceasinglescenariomay
+containmultiplesub-scenariosandtheircorrespondingRoutines,placingthisentirecollectioninto
+theexecutionmodel’ssystempromptwouldsignificantlyincreaseinferencecostsandcoulddecrease
+accuracybyintroducingirrelevantinformation[47].
+Therefore, we established a Procedure Memory base for our agent system. Before deployment,
+expertspopulatethismemorybasewiththenecessarysetofRoutines. Whenthesystemreceivesa
+relevantquery,itretrievestheappropriateRoutine(s)frommemorybasedonasimilaritycalculation
+betweentheRoutine’sdescriptionandtheuser’stask,therebyassistingtheexecutionmodel[48].
+3.4.2 VariableMemory
+In multi-step tool calling processes, the execution history gradually accumulates. The input and
+output parameters often occupy a large portion of the context window, leading to issues such as
+excessively long parameter values, excessive number of parameters, and redundant punctuation.
+These problems not only increase the pressure on the model’s context window and heighten the
+5https://www.anthropic.com/news/model-context-protocol
+probabilityofmodelhallucinations,butalsocausesmallermodelstomakesyntaxerrorsinvolving
+brackets,quotes,andescapecharacterswhenpassingparameters[53].
+Toeffectivelyaddressthisissue,weintroduce
+ourVariableMemorymechanism,asshownin
+Figure4.Itscorefunctionistooptimizeparame-
+terpassingbetweenmulti-steptoolcalls. When
+atoolcallreturnsanexcessivelylongparameter,
+thesystemautomaticallystoresitinthevariable
+memory base. The model then only needs to
+providethecorrespondingkeywhenfillingin
+the tool parameters, rather than the full value.
+Uponreceivingthetoolcallrequest,theMem-
+oryModuleautomaticallyretrievesthesekeys
+backtotheiractualparametervaluesbeforepass-
+ingthemtothetool[53]. TheVariableMemory
+mechanism significantly reduces context pres-
+sure,anditalsoreducestokenconsumptionand
+improvessyntacticaccuracy.
+Itisimportanttonotethatthisvariablememory
+isnon-persistent;allrelatedvariablememories
+are used only for the execution of the current
+task. Thisdesignensuresthatmemoryremains
+lightweightandresponsive,avoidsunnecessary
+storage overhead and data accumulation, and
+guarantees the independence of each task
+execution [54].
+Figure4. Aschematicdiagramofagent’svariable
+memorymechanism.
+
+## 4 AgentExecutionModelTraining
+
+### AI Summary
+The paper proposes a Routine-based structural planning framework for LLM agent systems in enterprise scenarios. The approach involves constructing a common Routine-following dataset to enhance the execution model's ability to follow instructions and using Routines as procedural knowledge for data distillation to generate scenario-specific multi-step tool call training data. This method aims to reduce the execution model's reliance on explicit planning and improve its capabilities in real-world scenarios compared to existing approaches that are susceptible to hallucinations and incorrect tool calls.
+
+### Original Content
+Common models can effectively execute Routines based on their generalized prompt-following
+capabilities. However,evenwhenthetoolsandparametersforeachsteparespecified,lightweight
+models remain susceptible to hallucinations, often leading to incorrect tool calls and parameter
+updates[47]. Toaddressthis,acommonRoutine-followingdatasetcanbeconstructedtoenhancethe
+executionmodel’sabilitytofollowinstructions. Inaddition,Routinescanserveastheprocedural
+knowledgefordatadistillation:Byusinghigh-capacitymodelsandRoutine,wecangeneratescenario-
+specificmulti-steptoolcalltrainingdata. Thisdistilleddatacanthenbeusedtotrainscenario-specific
+executionmodels,therebyreducingtheirrelianceonexplicitplanning[48].
+Inthispaper,weexploretheimpactofthesetwotrainingstrategiesonimprovingthecapabilitiesof
+executionmodels,withtheaimofidentifyingthebestwaysforleveragingRoutine-basedplanningin
+real-worldscenarios[49]. Thecompleteprocessofmodeltrainingfromdatasynthesistoevaluation
+isbrieflyshowninFigure5.
+4.1 ExperimentalScenarioSettingandUserQueries
+In this experiment, we selected a real-world enterprise scenario as the test setting: an HR agent
+applicationdeployedwithinalargecorporation(withmorethan8,000employees). Inthisscenario,
+HRusersinteractwiththeagenttoinquireaboutinformationrelatedtoemployeesanddepartments
+withinthecorporation.[45]
+TheHRagentscenariocomprisessevensub-scenarios,eachguidedbyadistinctRoutineusedto
+instruct the execution model in completing user queries, thereby requiring seven corresponding
+Routines. Inthisexperiment,wemanuallyannotatedallsevenRoutines. EachRoutineconsistsof
+4–7toolcallingsteps,witheachtoolrequiring1–3inputparameters. Duetoparameterdependencies
+acrosstools,theexecutionorderofstepswithinaRoutinemustfollowaspecificsequence. Theagent
+hasaccesstoanMCPserverthatcontains25functionallydistincttoolswithdifferentfunctionalities,
+including data query, permission verification, and model generation. Some tools require system
+Figure5. Theagentexecutesthemodeltrainingprocess. Thewholeprocessincludesthecommon
+Routinefollowingcapabilitytrainingandthescenario-specifictoolcallingcapabilitytraining,and
+canbedividedintothreemodules: datasynthesis,modelfine-tuningandmodelevaluation.
+parameterssuchascurrentuserID,whichareprovidedinthesystempromptpriortotaskexecution.
+Notably,3outofthe7Routinesintheevaluationscenarioinvolvebranchinglogic. Duringexecution,
+theagentmustevaluatethespecifiedconditionsandfollowtheappropriatebranchtocompletethe
+task. IfthesebranchingRoutinesarefurtherdecomposedintonon-branchingones,theHRagent
+systemscenariocanberepresentedas10distinctunbranchedRoutines.
+Inthefinalsummarizationstep,Routineguidestheexecutionmodeltocallasummarizationtool,
+ratherthandirectlygeneratingnaturallanguageoutputbytheexecutionmodelitself. Thistoolis
+pairedwithascenario-specificsummarizationtemplatetoensurethattheoutputremainsunaffected
+byothercomponentsofthesystemprompt. Oncetheexecutionmodelcallsthesummarizationtool,
+themulti-steptool-callingprocessiscomplete,andthetool’soutputisreturneddirectlytotheuser.
+4.2 DataSynthesis
+4.2.1 SystemPromptTemplateforExecutionModel
+Thesystemprompttemplateforsyntheticdatamustincorporateallnecessaryinformationrequired
+bytheexecutionmodeltoresolveatask. ItincludesRoutine-specificcontentsuchasroledefinitions,
+task,andbehavioralguidelines,alongwithsystemparameters,aRoutinetailoredtotheproblem,a
+variablememorydictionary,andatoollist–allorganizedinpreciseorderasthemodel’soperational
+context. ArepresentativeexampleofsuchasystempromptisprovidedintheAppendixA.
+4.2.2 CommonDataSynthesis
+WesynthesizedgeneralizedRoutinesfromthetrainingdatausingtheBUTTONopen-sourcedataset
+(BUTTONInstruct)6,aimingtoenhancethemodel’srobustnessinRoutine-followingacrossdiverse
+scenarios, rather than focusing solely on the procedural steps of a single case. The BUTTON
+datasetcomprises8,000single-turn,multi-steptoolcallinstancesspanningabroadarrayofcommon
+tasktypes. Eachinstancealternatesbetweentool_callandobservationtoformaclearlystructured
+execution trajectory. Leveraging these records, we utilized GPT-4o with a specialized prompt
+templatetogeneratepreciseandstructuredRoutines: eachRoutineenumeratesthestepindexand
+name, functional objectives, and the corresponding tool name. We then constructed new system
+prompts based on a standardized execution prompt template to improve adaptability to various
+workflowmechanisms.
+Subsequently,weperformedtargeteddatafilteringtooptimizetrainingefficiencyandmodelperfor-
+mance. SpecificoptimizationsareillustratedinFigure6andinclude:
+6https://github.com/PKU-Baichuan-MLSystemLab/BUTTON
+Figure6. ThecommonRoutine-followingdatasetfilteringpipeline.
+1. RoutineTextVerification: BasicverificationofgeneratedRoutinetexts,discardingentrieswith
+emptyresponsesorabnormaloutputs.
+2. RemovalofNaturalLanguageSummaries: Asfinalagent-levelsummariesaredelegatedtoa
+specializedsummarizationtool,weremovedallnaturallanguagesummariessteps,retainingonly
+userqueries,toolcalls,andcorrespondingobservationstostabilizetoolcallingoutputs.
+3. LengthandStructureFiltering: Weexcludedinstanceswithmorethaneighttoolcallsteps
+to prevent excessive computational load and removed any instances containing nested lists,
+dictionaries,orothercomplexdatastructurestomaintainformatsimplicityandsymbolicaccuracy.
+Basedonthesefilteringprocedures,weretained4,209high-quality,lightweighttrainingdata,which
+aimtostrengthenthemodel’scapabilityforfollowingRoutineindifferentspecificscenarios.
+4.2.3 Scenario-SpecificRoutineKnowledgeDistillation
+Besidesservingassystempromptstoprovidescenarioknowledgetoexecutionmodels,Routines
+canalsobeusedasmaterialsforknowledgedistillation[55]. Basedonuserquerieswithinspecific
+scenarios,Routinescanbeincorporatedintothesystempromptofateachermodeltogeneratestable,
+multi-steptoolcallingrecords. Theseoutputscanthenbeusedtotrainalightweightstudentmodel,
+enablingtheagenttocompletemulti-steptoolcallswithinascenariowithoutrelyingonexplicit
+Routine.
+To create a set of user queries in the HR agent scenarios, we designed 5–6 user query templates
+foreachof10distinct, non-branchingsub-scenarios. Byfillingoutthesetemplateswithvarious
+departmentandemployeeinformation,eachsub-scenarioyieldedapproximately50–60uniqueuser
+queries. Afterdatacleaning,weobtainedatotalof537userqueries. Tofurtherenhancedatadiversity
+andimprovethegeneralizationabilityofthemodel,weperformeddataaugmentationbyusingLLM
+togeneratesemanticallyequivalentvariationswithdifferentphrasing,whichimprovesthemodel’s
+robustness.
+Then, weusedGPT-4oequippedwithRoutinestodistillasetof537single-turn, multi-stepuser
+queriesfortheHRagentsystemscenarioafterdatacleaning. Eachsampleincludes4–7toolcalling
+steps,totaling3108labeledtoolcallinginstructions,whichwereusedtotraintheexecutionmodel
+inaspecific-scenario. Inaddition,wedistilledasetof200single-turn,multi-stepscenario-based
+userqueries,totaling1,148toolcalls. Thisdatasetwasusedtoevaluatemodelperformanceacross
+differentvariants.
+4.3 ModelTraining
+4.3.1 BaseModelSelectionandSetting
+IntheHRagentscenario,theexecutionmodelneedstohaveacertainlevelofinstruction-following
+andpreliminarytool-callingcapability,aswellasastrongChineseunderstanding. Inaddition,the
+execution model requires a small number of parameters, maintaining the efficiency of the agent
+systemintermsofcomputingresourcesandtimeconsumption. Therefore,weselectqwen2.5and
+qwen3seriesofsmall-scaleInstructmodelsfortraining. Whentrainingtheqwen3seriesmodels,we
+didnotenablemodelreasoningtraining,becausethetraininggoalismainlytoimprovethemodel’s
+abilitytofollowRoutine,andthereisnoneedtoutilizethinkingtoinferthetoolcallsinstruction,
+therebysavingthetokensofmodelreasoning.
+Weadded<routines>,</routines>,<variables>,</variables>tothespecialtokenstoappendRoutine
+fieldsandstorevariablememories. Registeringtheminthevocabularycanmakethemeffectively
+recognizedbythemodelandimprovethestabilityofmodeltraining.
+4.3.2 LoRAFine-tuningSetting
+To avoid overfitting and maximize ROI under enterprise-level computational constraints, we
+adopted LoRA, a lightweight fine-tuning strategy, aiming for cost-efficient adaptation on small-
+scaledatasets[56].
+Our experiments utilized the LLaMA-Factory framework with DeepSpeed ZeRO-3 and Flash
+Attention-2, which can maximize computational efficiency and significantly reduce GPU mem-
+oryusageduringmulti-GPUtraining[57][58]. Toenhancethemodel’sabilityincomprehending
+andreasoningoverstructureddatainbusinessscenarios,weadjustedthemaximumsequencelength
+toexceedtheactualinputlengthinallcases,therebyensuringthepreservationofcriticalstructural
+informationlikemulti-steptoolcallchainsduringpreprocessing.
+Wecreatedtwofine-tuningdatasets: ascenario-specificHRagentdatasetcontaining537instances
+andageneraldatasetwith4,209filteredinstances. ModeltrainingwasperformedonfourNVIDIA
+A10 GPUs (24GB VRAM each), with a LoRA rank of 8, batch size of 1 per GPU, and gradient
+accumulationstepssetto4,resultinginaneffectivebatchsizeof16perupdate. Thelearningrate
+wassetto1.0e-4withawarm-upratioof0.1. Basedonvalidationperformance,thefinalmodelwas
+selectedfromthecheckpointatepoch3,strikingabalancebetweenscenario-specificadaptationand
+generalizationcapability.
+
+## Evaluation
+
+### AI Summary
+The paper presents an evaluation methodology for assessing the execution model's ability to handle multi-step tool calls in an enterprise scenario, using the Berkeley Function-Calling Leaderboard (BFCL) framework. The evaluation process follows a hierarchical order, categorizing results into three main metrics: structural accuracy, tool selection accuracy, and parameter accuracy, with overall accuracy being the most stringent measure of the model's end-to-end problem-solving ability. The authors implement approximate matching for free text parameters to focus on the model's core abilities, rather than penalizing slight phrasing differences that do not significantly alter the semantic meaning.
+
+### Original Content
+5.1 EvaluationMethodology
+5.1.1 EvaluationFrameworkandProcedure
+Tocomprehensivelyandautomaticallyevaluatetheexecutionmodel’sabilitytohandlemulti-step
+toolcalls,wechoosetheopen-sourceBerkeleyFunction-CallingLeaderboard(BFCL)asourcore
+evaluationframework,primarilybasedonitsFunction-Calling(FC)modeandAbstractSyntaxTree
+(AST)evaluationmethod. Itoffersthedualadvantagesofevaluationefficiencyandpreciseerror
+attribution: itsspeedisnotaffectedbytoolresponselatency,whileitalsoprovidesadetailedanalysis
+ofvariouserrorsourcesinthemodel’stoolcallinginstructions[59].
+TheASTevaluationprocessfollowsahierarchicalorder,andwefurthercategorizetheresultsinto
+threemainevaluationmetricstocalculateindividualaccuracyratesandoverallaccuracy:
+• StructuralError: ThemodeloutputisfirstcheckedforvalidJSONformatting. Errorsinclude
+missingbrackets,punctuationerrors,andotherissuesthatcouldcauseASTparsingtofail.
+Figure7. ASTevaluationworkflowforourenterprisescenario. Theprocessismainlybasedonthe
+BFCLframeworkwithcategorizingerrorsintothreeprimarytypes: structural,toolselection,and
+parametererrors. Note: Thecontentoffreetextparametersisnotassessedviaexactmatchingduring
+parameterevaluation.
+• Tool Selection Error: If the structure is valid, the tool choice is evaluated. Errors include
+outputtingnaturallanguageinsteadofusingatool,callingincorrectnumbersoftools,orwrong
+tools(e.g.,confusingsimilartoolsornonexistentones).
+• ParameterError: Includesthreesubcategories: incorrectparametervalues,parameterhalluci-
+nation(fillinginparametersthatdonotexistinthetooldefinition,andmissingkeyparameters.)
+Note: Thisdoesnotcoverthedetectionofcontentfromafreetextparameter.
+• OverallAccuracy: Acaseiscountedascorrectonlyifallsteps(structure,tool,andparameters)
+areentirelyaccurate. Overallaccuracyisthemoststringentmeasureofthemodel’send-to-end
+problem-solvingability.
+The evaluation procedure is hierarchical as shown in Figure 7. The model output is prioritized
+forstructuralaccuracysinceastructuralfailurepreventstheparsingoftoolsandparameters. The
+selectionoftoolsisthenassessed. Finally,theparametercorrectnessisjudgedonlyiftheprevious
+stepsaresuccessful. Thishierarchyisalsoreflectedinourstatisticalanalysis: thestructuralaccuracy
+iscalculatedonallsamples,thetoolselectionaccuracyiscalculatedonthestructurallycorrectsubset,
+andtheparameteraccuracyiscalculatedonthesubsetwherebothstructureandfunctioncallswere
+correct. Thisensuresanobjectivemeasureoftheactualaccuracyforeachcategory. Weespecially
+implementapproximatematchingforfreetextparametersthatarefrequentlypassedinthisenterprise
+scenario. Rather than checking the exact value of parameters, it focuses on verifying parameter
+existence,illusion,andtypes. Slightphrasingdifferencesinlongnaturallanguageparameters(e.g.
+userneed-queryv.s. userneed: query)donotsignificantlyalterthesemanticmeaningbutwouldfail
+thestrict-matchingtest,leadingtoanunderestimationofthemodel’scoreabilities. Theapproximate
+matching allows the evaluation system to focus more on the model’s performance in instruction
+structure, tool selection, and key-parameter passing, providing a more objective reflection of its
+comprehensivetoolcallingcapabilities.
+5.1.2 TestDataSynthesis
+Weconstructedaspecializedevaluationdatasettoaccuratelyassessthemodel’sperformance. Using
+themodeldistillation,wegenerateda200single-turn,multi-stepevaluationdatasetfromtheHR
+agentscenarios. Thedatawerethendecomposedinto1,148individualtestsamplesforourautomated
+evaluation framework. Based on optimizations to the execution module, we focus on two key
+principlestoensurefairnessandvalidityduringthedecompositionprocess:
+1. DecompositionofTestSamples: Eachfullexecutiontracefromthedistillationprocesswas
+splitintomultiple,independenttestsamples. Everysampleincludesthehistoryofexecution
+stepsprecedingthecurrentone,aswellasthespecificsystempromptforthecurrentstep.
+2. RecordsofSystemPrompt: Duetothemechanismforstoringtemporarymemoryvariables,
+thesystempromptreceivedbytheagentcanbedynamicallyupdatedateachexecutionstep. We
+storethestateofthesystempromptateverysteptofullypreservetheagent’shistorycontext.
+Thisensuresthatthemodelisevaluatedwiththeexactcontextitwouldhaveinarealcontinuous
+interaction,whichisessentialforaccurateanalysisofthemodel’stoolcallabilityandrelated
+errors[60]
+Furthermore,werandomizedthesequenceoftoolsinthelistprovidedforeachtestsampletoensure
+thatthemodeldemonstratesatrueunderstandingofthetoolsratherthanrelyingontheirorder. This
+preventsthemodelfromdependingonpositionalbiasesandhelpstoguaranteethegeneralization
+abilityofourfindings[61].
+5.1.3 TestConfiguration
+Tocomprehensivelyexaminethemodel’sperformanceunderdifferentRoutineconfigurations,we
+generatethreedistinctevaluationscenariosfromtheoriginal1,148testsamplesbymodifyingthe
+Routinecomponent:
+1. No-RoutineScenario(Baseline): Theexecutionmodelonlyreceivestheuser’squeryandmust
+autonomouslyunderstandtheintent,deviseaplan,andcompletethetoolcalls. Thisservesasour
+baselineforevaluatingthemodel’sinherentcapabilitiesandforcomparisonagainstoptimization
+effects.
+2. Routine-Guided Scenario w/o Branches: The model is provided with a structured, linear
+Routine in natural language that outlines a clear path to the solution without any complex
+conditionalbranches. Thisteststhemodel’sinstruction-followingcapabilitywhengivenexplicit
+linearinstructions.
+3. Routine-GuidedScenariow/Branches: Thisscenarioalsoprovidesthemodelwiththesame
+Routine, but it includes conditional branches that require the model to make judgments and
+selections based on the results of intermediate steps. It is designed to evaluate the model’s
+executionstabilityandlogicalreasoningwhenhandlingmorecomplexnon-linearworkflows.
+In these tests, the Routine consists of the step number, name, description, and tool, but does not
+includeinput/outputparameterdescriptions. TheimpactofdifferentRoutinecomponentsisfurther
+exploredinthefollowingablationstudies.
+5.2 ResultsandDiscussion
+Forthisexperiment,weselectedavarietyofleadingindustryfoundationmodelsfortesting,including
+proprietarymodels: GPT-3.5-Turbo,GPT-4-Turbo,GPT-4o,andClaude-3.7-Sonnet,aswellasthe
+originalversionsofopen-sourceQwenseriesmodels: Qwen-2.5-7b-Instruct,Qwen-2.5-14b-Instruct,
+Qwen-3-8b,andQwen-3-14b. Theexperimentalsoevaluatedtheeffectsoftrainingforcommon
+Routinefollowingandtheimpactoftrainingonmulti-steptoolcallingdatathatwasdistilledusing
+Routine. Themodeltrainingstrategiesaredefinedasfollows:
+• CommonRoutinefollowingfine-tuning:Basedon4,209samplessynthesizedcommontraining
+dataset,aimtoimprovethemodel’sgeneralizedabilitytofollowthestructuredRoutine.
+• Scenario-specifictoolcallingfine-tuning: Basedon537single-turn,multi-steptoolcalling
+datasamplesdistilledfromthetargetscenario,aimtodirectlyimprovethemodel’sabilitytouse
+thescenario’stoolsformulti-steptoolcalls.
+5.2.1 ImpactofRoutineonLLMToolCallingPerformance
+WithoutRoutineguidance,allbaselinemodelsperformedpoorly,withnoneexceeding50%overall
+accuracy. Thisindicatesthatevenfortopmodels, relyingentirelyontheirautonomousplanning
+abilityforcomplex,multi-steptasksintroducessignificantuncertainty. Toolselectionerrorswere
+identifiedasthemaincauseoffailure,accountingforover85%ofallerrors. Thisfindingreveals
+Table2. OverallaccuracyofmodelsunderdifferentRoutineconfigurationsinHRagentsystem
+scenario. Thefine-tunedmodelsarecategorizedbytheirtrainingdataset: Commonreferstomodels
+trainedonthecommonRouting-followingdataset,whileScenarioreferstomodelstrainedonthe
+distilledmulti-steptoolcallingdataset.
+Training NoRoutine Routinew/Branch Routinew/oBranch
+Model
+Dataset Structural Tool Parameter Overall Structural Tool Parameter Overall Structural Tool Parameter Overall
+GPT-3.5-Turbo \ 99.8 26.0 95.3 22.1 99.8 53.8 98.2 52.7 99.9 59.7 98.1 58.5
+GPT-4-Turbo \ 100 44.6 97.5 43.5 100 99.1 99.8 99.0 100 98.7 99.6 98.3
+GPT-4o \ 100 42.2 97.3 41.1 100 96.3 99.9 96.3 100 97.0 99.9 97.0
+Claude-3.7-Sonnet \ 97.7 46.5 96.6 43.9 100 99.7 99.7 99.3 99.2 99.6 99.3 98.0
+Qwen2.5-7B \ 99.7 15.6 95.5 14.9 98.6 51.4 98.1 49.7 98.5 57.9 98.6 56.3
+Qwen2.5-14B \ 99.3 20.3 96.5 19.4 97.8 83.4 96.9 79.1 98.4 82.7 97.2 79.2
+Qwen3-8B \ 99.2 37.3 95.3 35.3 99.2 83.9 97.6 81.3 99.0 84.8 96.8 81.3
+Qwen3-14B \ 94.1 36.5 94.9 32.6 96.0 88.3 98.3 83.3 97.0 87.8 98.2 83.6
+Qwen2.5-7B Common 93.6 25.1 95.2 22.4 97.6 89.0 98.6 85.7 96.9 90.7 98.7 86.8
+Qwen2.5-14B Common 91.1 34.6 98.1 30.9 97.2 90.0 98.4 86.1 97.6 94.3 98.8 90.9
+Qwen3-8B Common 95.3 26.3 93.4 23.4 96.3 88.3 97.2 82.8 97.4 94.4 97.2 89.3
+Qwen3-14B Common 97.3 35.1 97.2 33.2 98.2 92.0 97.7 88.2 99.0 94.8 98.8 92.7
+Qwen2.5-7B Scenario 99.7 88.8 99.1 87.8 99.7 94.1 99.7 93.5 99.7 95.2 99.5 94.4
+Qwen2.5-14B Scenario 99.8 88.1 99.4 87.5 100 97.9 99.6 97.5 99.8 98.4 99.8 98.1
+Qwen3-8B Scenario 100 89.4 99.4 88.9 99.8 94.4 99.3 93.6 99.9 96.9 99.3 96.2
+Qwen3-14B Scenario 99.7 90.9 99.4 90.2 99.7 95.9 99.9 95.5 99.7 98.3 99.9 98.0
+thehugechallengemodelsfaceinaccuratelyselectingfromalargepoolofavailabletools(over25)
+andorganizingthemintoaneffectiveexecutionchainwithinaspecializeddomain.
+TheintroductionoftheRoutinemechanismledtoasubstantialimprovementinthemodels’end-to-
+endtoolcallingaccuracy. Inparticular,GPT-4-Turbo’sperformanceapproachedperfection,andthe
+Qwenseriesmodelsalsodemonstratedsignificantgains. Thisindicatesthatsettingawell-defined
+Routineplancansignificantlyreducetheuncertaintyinamodel’sexecutionprocess. TheRoutine
+mechanismcanthereforeeffectivelycompensatefortheplanningdeficienciesofsmallermodels,
+enablingthemtoachieveperformanceclosetotopmodelsinspecificscenarios. Ananalysisofthe
+errordistributionconfirmsthattheimprovementintoolselectionaccuracyisthemaindriverof
+theoverallaccuracyincrease. ThissuggeststhatRoutineeffectivelyguidesmodelstoselectthe
+correcttoolsbydecomposingtasksintoclear,actionablesteps. Structuralandparametererrorsalso
+sawconcurrentimprovements;althoughtheseerrorswerelessfrequentinbaselinetests,theywere
+furtherminimizedunderRoutineguidance.
+Acomparisonofthew/Branchandw/oBranchRoutinescenariosrevealedthatperformancewas
+generally higher in the w/o Branch scenario. The performance difference was small for high-
+performingmodels. However,formodelswithaverageperformance,theintroductionofbranches
+ledtoamorepronounceddeclineinaccuracy. Thissuggeststhattheuseofbranchinglogicwithin
+Routinesismosteffectivewhenbuiltuponamodel’salreadyrobusttoolcallingfoundationtoavoid
+performancedegradation.
+5.2.2 ImpactofModelTraining
+TheexperimentalresultsinTable2showthatfine-tuningwiththecommonRoutinefollowingdataset
+effectivelyimprovesthemodel’sexecutionaccuracywhenaRoutineisprovided. Comparedtotheir
+baselines,thesemodelsshowedsignificantimprovementsacrossallmetricsinthew/Routinescenar-
+ios. However,undertheNoRoutineconditionthatrequiresautonomousplanning,theperformanceof
+thesefine-tunedmodelsdeclined,indicatingatrade-offwheretheircommonproblem-solvingability
+wasreduced. Thisisbecausethestrategyreinforcesthemodel’sroleasaplanexecutorbutdoesnot
+enhanceitscorecapabilityasanautonomousplanner.
+In contrast, fine-tuning via scenario-specific data distillation achieved a significant improvement
+inoverallaccuracyundertheNoRoutinecondition,withperformanceexceedingoriginalmodels
+evenwhentheywereguided byRoutine. Thisindicatesthat forsmallermodels, using ateacher
+modelguidedbyaRoutinetodistilldatafortrainingallowstheproceduralknowledgetobedirectly
+internalizedwithinthestudentmodel,reducingthemodel’srelianceonanexplicitplan. Furthermore,
+whenaRoutineisprovidedtothesealready-specializedmodels,theiraccuracyisenhancedeven
+further,approachingthelevelofGPT-4oanddemonstratinghighlystableexecution. Thisconfirms
+thatinjectingproceduralknowledgebothinternally(viaweights)andexternally(viaprompts)isan
+effectivestrategyformaximizingthemodel’sstabilityinatargetscenario.
+5.3 AblationStudy
+HavingestablishedtheeffectivenessofRoutine,weconductedaseriesofablationstudiestoexplore
+theimpactofdifferentRoutinemechanismsettingsonoverallaccuracy. Thesestudiesfocusedon
+threemainareas: thecomponentsoftheRoutine,themethodofRoutineannotation,andthequantity
+ofRoutinesprovided.
+5.3.1 AblationonRoutineComponents
+We investigated the specific impact of a Routine’s different internal components on the model’s
+finalexecutionaccuracy,primarilytestingtheeffectsoftoolspecificationsanddetailedinput/output
+parameterdescriptions. Weestablishedthreeexperimentalconditionsunderthecomplexwithbranch
+scenario:
+• Baseline: ThemodelreceivesacompletenaturallanguageRoutinewithstepdescriptionsand
+toolnames,butwithoutdetailedparameterguidance.
+• WithI/ODescriptions: Buildingonthebaseline,detaileddescriptionsoftheinputsourceand
+expectedoutputareaddedtoeachstep.
+• WithoutToolName: Buildingonthebaseline,thedirectinstructionspecifyingwhichtoolto
+selectisremovedfromeachstep,requiringthemodeltoinfertheappropriatetoolfromthestep’s
+description.
+Testsonrepresentativemodels(Table3)revealthedistinctimpactofRoutinecomponents:
+Table3. OverallModelAccuracyonDifferentRoutineComponents
+Model BaselineRoutine Routinew/I/OParams Routinew/oTools
+GPT-3.5-Turbo 52.7 61.1 42.8
+GPT-4o 96.3 97.5 96.7
+Qwen2.5-7b 49.7 60.6 43.7
+Qwen2.5-14b 79.1 84.2 69.5
+Qwen3-8b 81.3 81.3 76.7
+Qwen3-14b 83.3 81.5 71.9
+Addingdetailedparameterdescriptionshadavariedeffect. Forlesscapablemodels,thisexplicit
+guidancewashighlyeffective,improvingtheircontextualunderstandingandsignificantlyreducing
+parametererrors. Forhigh-performancemodels,theadditionaldetailhelpedinmakingmorerobust
+judgmentsinedgecases,leadingtoincrementalperformancegains. Interestingly,theQwen3series
+models appeared largely insensitive to this addition, suggesting that for some architectures, the
+baselineRoutinealreadycontainsenoughcontextforparameterinference,andfurtherverbositymay
+interferemodel. Overall,includingI/OparameterdescriptionsinRoutineisaneffectivestrategy
+forimprovinganagent’sstabilityandapplicability,asitoffersessentialcontextformoderately
+capablemodelsandprovidesminorbenefitsevenforleadingmodels.
+The result confirms that explicitly specifying the tool name within Routine is a core element
+forensuringaccurateexecution. Whenthetoolnamewasremoved,allmodelsexceptthehighly
+stableGPT-4oexperiencedasignificantdropinaccuracy(typicallyby5%-15%). Thisdemonstrates
+that providing the tool name transforms a difficult reasoning problem which tool to use into a
+straightforwardexecutiontaskusethistool,therebyreducingthecognitiveloadrequiredtounderstand
+thetasklogic. WhileGPT-4odemonstratedexceptionalsemanticunderstandingbyinferringthe
+correcttoolfromthestepdescriptionalone,thiswasanoutlier. Forthemajorityofmodels,explicitly
+specifyingthetoolwithintheplanprovedtobehighlybeneficial.
+Basedonthisanalysis,weconcludethatawell-designedRoutineshouldfunctionasastructured
+execution plan containing both explicit tool instructions and sufficient descriptions, such as I/O
+parameters. This ensures the agent can complete tasks with maximum stability and accuracy,
+regardlessoftheunderlyingdrivingmodel’scapabilities.
+5.3.2 ImpactofAI-OptimizationMechanism
+In practice, there are different ways of agent planning, as shown in Figure 8. Using a manual
+Routinebringshighrobustness,butitsannotationiscostlyandunscalable. Therefore,weexplored
+AI-drivenoptimizationasapracticalalternative. ThisablationstudycomparedtheRoutineofvarying
+refinementlevels:
+• User-DraftedRoutine: Aninitial,incomplete,andunstructurednaturallanguagepromptfrom
+auser,containingonlythebasicsequenceofsteps. Thisisthestartingpointforevaluatingthe
+effectivenessofoptimization.
+• AI-OptimizedRoutine: Theuserdraftisautomaticallycorrected,completed,andrefinedby
+GPT-4oandsetsacorrespondingtoolselectionforeachstep,formingamorelogicalandcomplete
+naturallanguageRoutine.
+• ManuallyAnnotatedRoutine: AcompletenaturallanguageRoutinewithbranches,meticu-
+louslyannotatedandcalibratedbydomainexperts.
+• ValueoftheInitialDraft: Evenalow-qualityuserdraftimprovedmodelexecutionaccuracy.
+Thisdemonstratesthatevenaroughplanprovidescrucialguidanceformodelsandoutperforms
+fullyautonomoustoolcallinginspecializeddomains.
+Testsonrepresentativemodels(Table4)revealthedistinctimpactofdifferentRoutinegeneration
+methods:
+Table4. OverallmodelaccuracyondifferentgenerationmethodsofRoutine
+Model UserDraft AIOptimization HumanAnnotation
+GPT-3.5-Turbo 42.6 52.9 52.70
+GPT-4o 71.2 90.9 96.3
+Qwen2.5-7b 46.6 50.4 49.7
+Qwen2.5-14b 61.7 82.3 79.1
+Qwen3-8b 70.4 73.8 81.3
+Qwen3-14b 70.9 76.7 83.3
+The AI optimization step brought sig-
+nificant and universal performance im-
+provements. The performance of GPT-
+4o, bridgedmostofthegapbetweenba-
+sic usability and high reliability. The
+Qwen3seriesmodelshavealsoachieved
+stable improvements. Some models
+even achieved higher accuracy with AI-
+optimizedRoutinethanwiththemanually
+annotatedbaseline,possiblybecausethe
+AI-optimizedformatwasmoreeasilyun-
+derstoodbythosemodels.Thisshowsthat
+usingAItorefineauser-draftedRoutine
+isanefficientandviablepathwayforen- Figure8. DifferentwaysofAgentPlanning
+terprisescenarios.
+However,themanuallyannotatedbaselinestillproducedthehighestaccuracyforhigh-performance
+models. Thedetailsprovidedbyhumanexpertsremaincrucial,asthesemodelsarecapableenough
+to benefit from these subtle details. Therefore, in real-world applications, a final review of the
+AI-optimizedRoutinebydomainexpertsisstillrecommended.
+5.3.3 AblationonRoutineQuantity
+An agent system often needs to handle multiple sub-scenarios, requiring a library of Routines.
+LoadingallRoutinesintothesystempromptwouldconsumealargecontextwindow. Toaddress
+this,thesystemcanimplementaprocedurememoryrecallmechanisminthememorymoduleas
+mentioned in Section 3.4. However, recalling a single Routine can easily cause precision issues,
+whilerecallingmultipleRoutinescanintroducenoisefrominterferingRoutinesthataresimilarbut
+notperfectlyapplicable. Thisstudyteststhemodel’sstabilitywhenfacedwithmultiplecandidate
+Routines. Thesetupisasfollows:
+• Baseline(1Routine): ThemodelreceivesonlyonecorrectRoutine.
+• Multi-RoutineInterferenceScenario: Themodelisprovidedwith2,3,or5Routinesintotal,
+eachlabeledwithitsnameandfunction. Onlyoneisapplicable;therestareinterferencesthatare
+notrelatedtothissub-scenario. TheorderofRoutinesisshuffledtopreventpositionalbias.
+The results of the tests are shown in (Table 5), which reflects the impact of multiple numbers of
+Routines:
+Table5. OverallmodelaccuracyonmultiplenumbersofRoutines
+Model 1Routine(Baseline) 2Routines 3Routines 5Routines
+GPT-3.5-Turbo 52.7 53.6 54.7 60.0
+GPT-4o 96.3 76.6 80.1 88.6
+Qwen2.5-7b 49.7 45.1 45.0 54.4
+Qwen2.5-14b 79.1 55.8 60.7 71.3
+Qwen3-8b 81.3 66.0 66.9 72.2
+Qwen3-14b 83.3 63.2 67.2 79.9
+Theresults(Table5)showthatprovidingasinglecorrectRoutineismosteffectiveforhigh-performing
+models. Theiraccuracydroppedsignificantlywhenevenonedistractorwasintroduced. However,as
+thenumberofrecalledRoutinesincreased,theaccuracybegantorecover. Wehypothesizeashift
+inthemodel’sbehavior: whenfacedwithasmallnumberofconflictingRoutines,itmayattempt
+tocombinetheirsteps,leadingtoerrors. AsthenumberofRoutinesincreases,itmayswitchtoa
+selectionmechanism(similartotoolselection),identifyingandexecutingthemostrelevantRoutine,
+thusimprovingperformance.
+Performance fluctuations are greater for smaller models, sometimes even increasing with more
+numbersofRoutines. Webelievethatthisiscausedbyoverlappingsub-stepsofsomeRoutines. As
+moreRoutinesarerecalled,thesecommonsub-stepsrepeatedlyappear,whichmaycausethemodel
+toallocateextraattentiontothem. Thisrepetitionimprovestheexecutionaccuracyofthesespecific
+sub-stepsforlesscapablemodels,resultinginanincreaseintheoverallscenarioaccuracy.
+Theexperimentindicatesthatanagent’smemorymodulemustbecarefullydesignedandoptimized
+toachievehighprecisionandrecall,aimingtoprovideonlyonesingleandmostrelevantRoutineto
+theexecutionmodeltoenhancesystemefficiencyandstability.
+
+## 6 LimitationandFutureWork
+
+### AI Summary
+The Routine mechanism enhances an LLM agent system's ability to solve multi-step tasks using tools in specific scenarios. However, the current reliance on domain expert drafts for Routine flows and instruction fine-tuning for execution models limits the system's generalization capability when new tools are introduced or workflow changes occur. Future research aims to incorporate RL-based agent frameworks, combine instruction fine-tuning with reinforcement learning, and explore a multi-agent framework centered around the Routine mechanism to develop more intelligent, robust, and adaptive LLM-based agents for complex enterprise environments.
+
+### Original Content
+The Routine mechanism we proposed has demonstrated its effectiveness in enhancing an agent
+system’s ability to solve tasks via multi-step tool invocation within specific scenarios. However,
+currentplanningmodelsprimarilyrelyondraftsprovidedbydomainexpertstogenerateRoutine
+flows, whileexecutionmodelsaremostlyadaptedthroughinstructionfine-tuningviaknowledge
+distillation. Thisreliancelimitsthesystem’sgeneralizationcapabilitywhennewtoolsareintroduced
+orworkflowchangesoccurwithinenterpriseenvironments,leavingroomforimprovementinagent
+autonomyandadaptability.
+Toaddressthischallenge,incorporatingRL-basedagentframeworksintotheworkflow,including
+mechanismsfordatadistillationandrewardmodelingmightbeapossiblesolution. Thisapproach
+aimstoimprovetheRoutinegenerationcapabilityoftheplanningmodelaswellasthetoolinvo-
+cationcapabilityoftheexecutionmodel. Thecombinationofinstructionfine-tuningforcoldstart
+and reinforcement learning has shown promising potential in improving both generalization and
+adaptabilityinscenario-basedtasks,andmayemergeasafutureparadigmfortrainingagent-based
+languagemodels[62].
+Furthermore,weaimtoexploreamulti-agentframeworkcenteredaroundtheRoutinemechanism,in
+whichahigh-levelagentcoordinatesmultiplespecializedagentsthroughasetofstructuredRoutine
+flowsandcentralizedinteractionprotocols. Wehypothesizethatthishierarchicalinteractionscheme
+caneffectivelyreducethecomplexityandlengthofindividualRoutineplans,therebyenablingmore
+stable and intelligent execution of enterprise workflows. Through this line of research, our goal
+istodevelopmoreintelligent,robust,andadaptiveLLM-basedagentscapableofleveragingtools
+efficientlytosolvecomplexuserproblemsindynamicenterpriseenvironments.
+
+## Conclusion
+
+### AI Summary
+This paper introduces Routine, a structured planning framework for guiding multi-step tool execution in LLM agent systems, which significantly improves execution accuracy and enables smaller models to achieve high and stable performance in enterprise scenarios. The key contributions include the Routine framework itself, a synthesized training dataset for enhancing Routine distillation, and the generation of domain-specific, multi-step tool-calling datasets via Routine-based distillation. The Routine mechanism has significant implications for improving the adaptability of agent systems to enterprise scenarios, allowing AI to more effectively assist in executing enterprise processes and realizing the technical vision of AI for Process.
+
+### Original Content
+Inthispaper,wedesignRoutine,astructuredandcomprehensiveplanningframeworkforguiding
+multi-step tool execution in agent systems. Using Routine, we investigate how well-defined
+plans improve the accuracy of the model’s multi-step execution. We also synthesize a training
+dataset to enhance Routine distillation capabilities and generate domain-specific, multi-step
+tool-calling datasets via Routine-based distillation. Our experimental results demonstrate that
+Routines significantly improve the execution model’s accuracy, improving the performance of
+the Qwen3-14b model by approximately 50%, from 32.6% to 83.3%. This accuracy is further
+increased after fine-tuning the model for Routine following. Furthermore, by using Routines to
+distilltrainingdatasetsforscenario-specificfine-tuning,theperformanceofQwen3-14bhasbeen
+improved to 95.5%, which is comparable to GPT-4o, enabling smaller models to achieve high
+and stable accuracy in enterprise scenarios. In conclusion, the Routine mechanism significantly
+improvestheadaptabilityofagentsystemstoenterprisescenarios. ItallowsAItoassistmoreeffec-
+tivelyintheexecutionofenterpriseprocesses,therebyrealizingthetechnicalvisionofAIforProcess.
+
+## References
+
+### AI Summary
+This section contains a list of 17 references from an academic paper. The references cover topics related to large language models, autonomous agents, data science, knowledge graphs, enterprise AI architectures, workflow generation, code generation, business process automation, and personal agents. The references span from 2023 to 2025, indicating the paper is discussing recent and emerging research in these areas.
+
+### Original Content
+[1] MichaelWooldridge. AnIntroductiontoMultiAgentSystems. JohnWiley&Sons,2ndedition,
+2009.
+[2] LeiWang,ChenMa,XueyangFeng,ZeyuZhang,HaoYang,JingsenZhang,ZhiyuanChen,
+JiakaiTang,XuChen,YankaiLin,WayneXinZhao,ZheweiWei,andJirongWen. Asurveyon
+largelanguagemodelbasedautonomousagents. FrontiersofComputerScience,18(6),March
+2024.
+[3] Sirui Hong, Yizhang Lin, Bang Liu, Bangbang Liu, Binhao Wu, Ceyao Zhang, Chenxing
+Wei,DanyangLi,JiaqiChen,JiayiZhang,JinlinWang,LiZhang,LingyaoZhang,MinYang,
+Mingchen Zhuge, Taicheng Guo, Tuo Zhou, Wei Tao, Xiangru Tang, Xiangtao Lu, Xiawu
+Zheng,XinbingLiang,YayingFei,YuhengCheng,ZhibinGou,ZongzeXu,andChenglinWu.
+Datainterpreter: Anllmagentfordatascience,2024.
+[4] ShishirG.Patil,TianjunZhang,XinWang,andJosephE.Gonzalez. Gorilla: Largelanguage
+modelconnectedwithmassiveAPIs. arXivpreprintarXiv:2305.15334,2023.
+[5] ThaynáCamargodaSilva. Extractingknowledgegraphsfromuserstoriesusinglangchain,
+2025.
+[6] MinjieShenandQikaiYang.Frommindtomachine:Theriseofmanusaiasafullyautonomous
+digitalagent,2025.
+[7] EserKandogan,NikitaBhutani,DanZhang,RafaelLiChen,SairamGurajada,andEstevam
+Hruschka. Orchestratingagentsanddataforenterprise: Ablueprintarchitectureforcompound
+ai,2025.
+[8] RuixuanXiao,WentaoMa,KeWang,YuchuanWu,JunboZhao,HaoboWang,FeiHuang,and
+YongbinLi. Flowbench: Revisitingandbenchmarkingworkflow-guidedplanningforllm-based
+agents,2024.
+[9] HongshenXu,ZichenZhu,LeiPan,ZihanWang,SuZhu,DaMa,RuishengCao,LuChen,and
+KaiYu. Reducingtoolhallucinationviareliabilityalignment,2025.
+[10] ZhenZeng,WilliamWatson,NicoleCho,SabaRahimi,ShayleenReynolds,TuckerBalch,and
+ManuelaVeloso. Flowmind: Automaticworkflowgenerationwithllms,2024.
+[11] VladimirSonkinandCa˘ta˘linTudose.Beyondsnippetassistance:Aworkflow-centricframework
+forend-to-endai-drivencodegeneration. Computers,14(3):94,2025.
+[12] Laura Minkova, Jessica López Espejel, Taki Eddine Toufik Djaidja, Walid Dahhane, and
+ElHassaneEttifouri. Fromwordstoworkflows: Automatingbusinessprocesses,2024.
+[13] MichaelWornow,AvanikaNarayan,KristaOpsahl-Ong,QuinnMcIntyre,NigamH.Shah,and
+ChristopherRe. Automatingtheenterprisewithfoundationmodels,2024.
+[14] SegevShlomov,AviYaeli,SamiMarreed,SivanSchwartz,NetanelEder,OfferAkrabi,and
+SergeyZeltyn. Ida: Breakingbarriersinno-codeuiautomationthroughlargelanguagemodels
+andhuman-centricdesign,2024.
+[15] OpenAICookbook. Usingreasoningforroutinegeneration. https://cookbook.openai.
+com/examples/o1/using_reasoning_for_routine_generation, 2024. Accessed on
+July16,2025.
+[16] YanmingLiu,XinyuePeng,JiannanCao,ShiBo,YuweiZhang,XuhongZhang,ShengCheng,
+Xun Wang, Jianwei Yin, and Tianyu Du. Tool-planner: Task planning with clusters across
+multipletools,2025.
+[17] VinodMuthusamy,YaraRizk,KiranKate,PraveenVenkateswaran,VatcheIsahagian,Ashu
+Gulati,andParijatDube. Towardslargelanguagemodel-basedpersonalagentsintheenterprise:
+Currenttrendsandopenproblems. InHoudaBouamor,JuanPino,andKalikaBali,editors,
+FindingsoftheAssociationforComputationalLinguistics: EMNLP2023,pages6909–6921,
+Singapore,December2023.AssociationforComputationalLinguistics.
+[18] HuiYang,SifuYue,andYunzhongHe. Auto-gptforonlinedecisionmaking: Benchmarksand
+additionalopinions,2023.
+[19] YasharTalebiradandAmirhosseinNadiri. Multi-agentcollaboration: Harnessingthepowerof
+intelligentllmagents,2023.
+[20] QingyunWu,GaganBansal,JieyuZhang,YiranWu,BeibinLi,ErkangZhu,LiJiang,Xiaoyun
+Zhang,ShaokunZhang,JialeLiu,AhmedHassanAwadallah,RyenWWhite,DougBurger,and
+ChiWang. Autogen: Enablingnext-genllmapplicationsviamulti-agentconversation,2023.
+[21] EdwardY.ChangandLonglingGeng. Sagallm: Contextmanagement,validation,andtransac-
+tionguaranteesformulti-agentllmplanning,2025.
+[22] YunjiaQi,HaoPeng,XiaozhiWang,AmyXin,YoufengLiu,BinXu,LeiHou,andJuanziLi.
+Agentif: Benchmarkinginstructionfollowingoflargelanguagemodelsinagenticscenarios,
+2025.
+[23] JiinKim, ByeongjunShin, JinhaChung, andMinsooRhu. Thecostofdynamicreasoning:
+Demystifyingaiagentsandtest-timescalingfromanaiinfrastructureperspective,2025.
+[24] QingyuLu,LiangDing,SiyiCao,XueboLiu,KanjianZhang,JinxiaZhang,andDachengTao.
+Runawayisashamed,buthelpful: Ontheearly-exitbehavioroflargelanguagemodel-based
+agentsinembodiedenvironments,2025.
+[25] ChandradeepPokhariya,IshaanNShah,AngelaXing,ZekunLi,KefanChen,AvinashSharma,
+andSrinathSridhar. Manus: Markerlessgraspcaptureusingarticulated3dgaussians,2024.
+[26] WentaoZhang,CeCui,YileiZhao,RuiHu,YangLiu,YahuiZhou,andBoAn. Agentorchestra:
+Ahierarchicalmulti-agentframeworkforgeneral-purposetasksolving,2025.
+[27] ShunyuYao, JeffreyZhao, DianYu, NanDu, IzhakShafran, KarthikNir, andAnirudhNir.
+ReAct: Synergizingreasoningandactinginlanguagemodels. InInternationalConferenceon
+LearningRepresentations(ICLR),2023.
+[28] LutfiErenErdogan,NicholasLee,SehoonKim,SuhongMoon,HirokiFuruta,GopalaAnu-
+manchipalli,KurtKeutzer,andAmirGholami. Plan-and-act: Improvingplanningofagentsfor
+long-horizontasks,2025.
+[29] HuaixiuStevenZheng,SwaroopMishra,HughZhang,XinyunChen,MinminChen,Azade
+Nova, Le Hou, Heng-Tze Cheng, Quoc V. Le, Ed H. Chi, and Denny Zhou. Natural plan:
+Benchmarkingllmsonnaturallanguageplanning,2024.
+[30] ElliotGestrin,MarcoKuhlmann,andJendrikSeipp. Nl2plan: Robustllm-drivenplanningfrom
+minimaltextdescriptions,2024.
+[31] L. Diao, C. Yang, and Z. Zhang. Guidebench: Benchmarking domain-oriented guideline
+followingforllmagents. arXiv,2025.
+[32] JasonWei,XuezhiWang,DaleSchuurmans,MaartenBosma,BrianIchter,FeiXia,EdChi,
+QuocLe,andDennyZhou. Chain-of-thoughtpromptingelicitsreasoninginlargelanguage
+models,2023.
+[33] VictorSanh,AlbertWebson,ColinRaffel,StephenH.Bach,LintangSutawika,ZaidAlyafeai,
+Antoine Chaffin, Arnaud Stiegler, Teven Le Scao, Arun Raja, Manan Dey, M Saiful Bari,
+CanwenXu,UrmishThakker,ShanyaSharmaSharma,ElizaSzczechla,TaewoonKim,Gunjan
+Chhablani,NihalNayak,DebajyotiDatta,JonathanChang,MikeTian-JianJiang,HanWang,
+MatteoManica,ShengShen,ZhengXinYong,HarshitPandey,RachelBawden,ThomasWang,
+TrishalaNeeraj,JosRozen,AbheeshtSharma,AndreaSantilli,ThibaultFevry,JasonAlanFries,
+RyanTeehan,TaliBers,StellaBiderman,LeoGao,ThomasWolf,andAlexanderM.Rush.
+Multitaskpromptedtrainingenableszero-shottaskgeneralization,2022.
+[34] YizhongWang,YeganehKordi,SwaroopMishra,AlisaLiu,NoahA.Smith,DanielKhashabi,
+andHannanehHajishirzi. Self-instruct: Aligninglanguagemodelswithself-generatedinstruc-
+tions,2023.
+[35] J.Zhou,T.Lu,andS.etal.Mishra. Instruction-followingevaluationforlargelanguagemodels.
+arXiv,2023.
+[36] B.Wen,P.Ke,andX.etal.Gu. Complexbench: Benchmarkingcomplexinstruction-following
+withmultipleconstraintscomposition. arXiv,2024.
+[37] X.Zhang,H.Yu,andC.etal.Fu. Iopo: Empoweringllmswithcomplexinstructionfollowing
+viainput-outputpreferenceoptimization. arXiv,2024.
+[38] YiduoGuo,ZhenGuo,ChuanweiHuang,Zi-AngWang,ZekaiZhang,HaofeiYu,Huishuai
+Zhang, andYikangShen. Syntheticdatarl: Taskdefinitionisallyouneed. arXivpreprint
+arXiv:2505.17063,2025.
+[39] Yujia Qin, Shengding Hu, Zixuan Liu, Shuo Wang, Yilun Zhao, Shunyu Yao, Yilun Chen,
+WeizhiChen,andThomasL.Griffiths. ToolBench: Anopenplatformfortool-usageevaluation.
+arXivpreprintarXiv:2307.16789,2023.
+[40] Weiwen Liu, Xu Huang, Xingshan Zeng, Xinlong Hao, Shuai Yu, Dexun Li, Shuai Wang,
+WeinanGan,ZhengyingLiu,YuanqingYu,etal. Toolace: Winningthepointsofllmfunction
+calling. arXivpreprintarXiv:2409.00920,2024.
+[41] QiaoyuTang,ZiliangDeng,HongyuLin,XianpeiHan,QiaoLiang,BoxiCao,andLeSun.
+Toolalpaca: Generalizedtoollearningforlanguagemodelswith3000simulatedcases. arXiv
+preprintarXiv:2306.05301,2023.
+[42] ZuxinLiu,ThaiHoang,JianguoZhang,MingZhu,TianLan,JuntaoTan,WeiranYao,Zhiwei
+Liu, Yihao Feng, Rithesh RN, et al. Apigen: Automated pipeline for generating verifiable
+and diverse function-calling datasets. Advances in Neural Information Processing Systems,
+37:54463–54482,2024.
+[43] MoonshotAI. Kimi-k2: Anagenticframeworkfortool-augmentedlanguagemodels,2024.
+Accessed: 2025-07-16.
+[44] GeoffreyHinton,OriolVinyals,andJeffDean. Distillingtheknowledgeinaneuralnetwork.
+arXivpreprintarXiv:1503.02531,2015.
+[45] GuanchengZeng,WentaoDing,BeiningXu,ChiZhang,WenqiangHan,GangLi,Jingjing
+Mo,PengxuQiu,XinranTao,WangTao,andHaowenHu. Adaptableandprecise: Enterprise-
+scenariollmfunction-callingcapabilitytrainingpipeline,2024.
+[46] ChangleQu,SunhaoDai,XiaochiWei,HengyiCai,ShuaiqiangWang,DaweiYin,JunXu,
+andJi-rongWen. Toollearningwithlargelanguagemodels: asurvey. FrontiersofComputer
+Science,19(8),January2025.
+[47] PriyankaNeelakrishnan. Redefiningenterprisedatamanagementwithai-poweredautomation,
+2024.
+[48] GugulothandKumar. Ai-powereddecisionintelligenceinenterprisesystemsengineering,2025.
+[49] ZeebareeandMustafa. Ai-driveninnovationsinenterprisesystems,2025.
+[50] Gopalaswamy. Integratingartificialintelligenceinenterprisearchitecture,2025.
+[51] XuanqiGao,SiyiXie,JuanZhai,ShqingMa,andChaoShen. Mcp-radar: Amulti-dimensional
+benchmark for evaluating tool use capabilities in large language models. arXiv preprint
+arXiv:2505.16700,2025.
+[52] MiaomiaoJi,YanqiuWu,ZhibinWu,ShoujinWang,JianYang,MarkDras,andUsmanNaseem.
+Asurveyonprogressinllmalignmentfromtheperspectiveofrewarddesign,2025.
+[53] Kiran Kate, Tejaswini Pedapati, Kinjal Basu, Yara Rizk, Vijil Chenthamarakshan, Subhajit
+Chaudhury,MayankAgarwal,andIbrahimAbdelaziz. Longfunceval: Measuringtheeffective-
+nessoflongcontextmodelsforfunctioncalling,2025.
+[54] JieLinandDavidMohaisen. Evaluatinglargelanguagemodelsinvulnerabilitydetectionunder
+variablecontextwindows,2025.
+[55] KalleKujanpää,HarriValpola,andAlexanderIlin. Knowledgeinjectionviapromptdistillation,
+2024.
+[56] EdwardJ.Hu,YelongShen,PhillipWallis,ZeyuanAllen-Zhu,YuanzhiLi,SheanWang,and
+LuWang. LoRA:Low-rankadaptationoflargelanguagemodels. InInternationalConference
+onLearningRepresentations(ICLR),2022.
+[57] SamyamRajbhandari,JeffRasley,OlatunjiRuwase,andYuxiongHe. Zero: Memoryoptimiza-
+tionstowardtrainingtrillionparametermodels,2020.
+[58] TriDao. Flashattention-2: Fasterattentionwithbetterparallelismandworkpartitioning,2023.
+[59] ShishirG.Patil,HuanzhiMao,CharlieCheng-JieJi,FanjiaYan,VishnuSuresh,IonStoica,and
+JosephE.Gonzalez. Theberkeleyfunctioncallingleaderboard(bfcl): Fromtoolusetoagentic
+evaluationoflargelanguagemodels. InAdvancesinNeuralInformationProcessingSystems,
+2024.
+[60] Y.Ye. Taskmemoryengine: Spatialmemoryforrobustmulti-stepllmagents,2025.
+[61] Shengyue Guan, Haoyi Xiong, Jindong Wang, Jiang Bian, Bin Zhu, and Jian guang Lou.
+Evaluatingllm-basedagentsformulti-turnconversations: Asurvey,2025.
+[62] MaggieHuan,YuetaiLi,TuneyZheng,XiaoyuXu,SeungoneKim,MinxinDu,RadhaPooven-
+dran,GrahamNeubig,andXiangYue. Doesmathreasoningimprovegeneralllmcapabilities?
+understandingtransferabilityofllmreasoning. arXivpreprintarXiv:2507.00432,2025.
+A Appendix: PromptTemplate
+A.1 PromptforStructuredRoutineGeneration
+prompt = f"""You are a Routine workflow writer for a company. You can write the
+operation step flow based on the process information provided by the user
+and the available tools.
+The steps are written in structured json and lists. Write the flow in the
+following way:
+[{"step": "1", "name": "xxxxx", "description": "xxxxxxxxxxxx", "tool": "tool_X",
+"type": "node"},
+{"step": "2", "name": "xxxxx", "description": "xxxxxxxxxxxx", "tool": "tool_Y",
+"type": "node"}]
+The format is a json list. Each step contains the step number, step name, step
+action description, step input, step output, step tool, and node type.
+The input and output of the step do not have to be very specific. Use natural
+language to write the possible input and output according to the tool. Only
+one tool is used for each step.
+When you may encounter branch condition judgment in a certain step, express it
+in the following way and indicate under what conditions to enter a branch,
+what tool to use;
+{"step": "x", "name": "xxxxx", "type": "branch"},
+{"step": "x-1_1", "name": "xx", "description": "xxxx", "tool": "tool_X1", "
+type": "branchnode"},
+{"step": "x-2_1", "name": "xx", "description": "xxxx", ""tool": "tool_X2", "
+type": "branchnode"},
+{"step": "y", "name": "xxxxx", "description": "xxxxxx", "tool": "tool_Y", "type
+": "node"}
+If the next branch step involves multiple steps, you can open a new branch
+workflow, for example:
+{"step": "x-n_1", "name": "xx", "description": "xxxx", "tool": "tool_X", "type":
+"branchnode"},
+{"step": "x-n_2", "name": "xx", "description": "xxxx", "tool": "tool_Y", "type":
+"branchnode"}
+Regarding the writing of step numbers, x-n_i represents the i-th step in the n-
+th branch of the main line step x;
+Please pay attention to the description in the tool and the parameters that
+need to be filled in, which need to be fed back in the input of each step;
+Pay attention to the branch judgment in the process information, and do not
+write multiple possibilities of branch conditions in the steps of the same
+line;
+When a step is completed and the workflow needs to be ended, please change the
+node type of the step to "finish", set "type": "finish"; For example:
+{"step": "x", "name": "xxxxx", "description": "xxx", "tool": "tool_X", "type":
+"finish"}
+Note: Each workflow step must use a tool provided in the tool list, or perform
+branch condition judgment. There will be no "no tool needed", "no tool used
+", or use of non-existent tools. Each step only uses one tool.
+The following is the process information provided by this user: {routine_draft};
+In the tool list, these tools are available: {tool_list};
+Now please convert it into a structured Routine workflow. Do not output other
+prefixes, suffixes, or meaningless information, and please output in
+Chinese."""
+Withtheaboveprompttemplate,LLMscanconverttheuserplanningdraftintoaroutine. Theoutput
+Routine is in a standardized JSON format and can be further converted into a natural language
+RoutineasshowninB.1;
+A.2 Routine’sSystemPromptTemplateforToolCalling
+prompt = f"""<|im_start|>system
+You are a digital HR of a company, and you can use multiple different types of
+tools to query relevant data of user questions and answer user questions;
+You have a scenario workflow operation step called Routine. You need to select
+a tool to call based on the steps in the Routine and the completed
+historical steps;
+You have completed tool calls for similar scenarios before and have a memory of
+tool calls for similar scenarios. Now you can imitate the previous tool
+calls to select the tool you need to call now based on the historical
+dialogue information;
+Please strictly imitate the tool call instruction steps in the Routine, do not
+add tool call instructions that have not appeared in the Routine, and only
+output one tool call at a time;
+In the case of branches, please judge the branches of subsequent steps
+according to the conditions of each branch;
+Note: When temporary variable memory_xxx appears in the result returned by the
+tool result, it means that the value of the variable xxx is too long and is
+stored in the temporary variable memory. Try to fill in temporary variable
+memory_xxx instead of the actual value in the tool call parameters;
+The user id of the current question is USER_ID;
+# Routine
+To solve user questions, you need to refer to the following routines, select
+the tool you need to call, and make function calls based on the current
+progress and chat history.
+Please strictly follow the routines, do not skip any steps, and only output one
+function call at a time.
+The <routines></routines> XML tag provides you with the routine signatures of
+the workflow operation steps:
+<routines>
+
+## {Routines_Description}
+
+### AI Summary
+The system uses temporary variables within the <variables></variables> XML tag to store intermediate results. This ensures a smooth flow of information between each step in the routine. The variables section allows the system to record and pass data as needed throughout the process.
+
+### Original Content
+</routines>
+# Variables
+To ensure smooth information flow between each step, the system puts the
+following temporary variables into the <variables></variables> XML tag to
+record the intermediate results:
+<variables>
+
+## {Variables_Memory}
+
+### AI Summary
+</variables>
+# Tools
+You may call one or more functions to assist with the user query.
+You are provided with function signatures within <tools></tools> XML tags:
+<tools>
+
+### Original Content
+</variables>
+# Tools
+You may call one or more functions to assist with the user query.
+You are provided with function signatures within <tools></tools> XML tags:
+<tools>
+
+## Tools
+
+### AI Summary
+The Tools section provides a structured framework for creating multi-step tool calls in natural language and JSON format for LLM agent systems. It includes an example routine for downloading an employee handbook, extracting its text content, and comparing it with the latest company announcements. The section also demonstrates how to represent the routine and tool calls in a conversational dataset format compatible with ShareGPT.
+
+### Original Content
+</tools>
+For each function call, return a json object with function name and arguments
+within <tool_call></tool_call> XML tags:
+<tool_call>
+{"name": <function-name>, "arguments": <args-json-object>}
+</tool_call><|im_end|>
+B Appendix: RoutineandDatasetExample
+B.1 RoutineforToolCallinginNaturalLanguage
+<routines>
+Step 1. Get announcements: Download the latest employee handbook file from the
+company’s internal system, use the fetch_latest_announcements tool;
+Step 2. Download handbook: Obtain the company’s most recent official
+announcement for consistency check with the employee handbook, use the
+download_file tool;
+Step 3. Read PDF content: Use text parsing tools to extract all text content
+from the employee handbook PDF file, use the read_pdf tool;
+Step 4. Compare text differences: Compare the relevant content in the employee
+handbook with the company’s latest announcement word by word, using the
+compare_texts tool, and end the workflow;
+</routines>
+B.2 StructuredRoutineforToolCallinginJSONFormat
+"step": "1"
+"name": "Get announcements"
+"description": "Download the latest employee handbook file from the company’s
+internal system"
+"tool": "fetch_latest_announcements"
+"type": "node"
+"step": "2"
+"name": "Download handbook"
+"description": "Obtain the company’s most recent official announcement for
+consistency check with the employee handbook"
+"tool": "download_file"
+"type": "node"
+"step": "3"
+"name": "Read PDF content"
+"description": "se text parsing tools to extract all text content from the
+employee handbook PDF file"
+"tool": "read_pdf"
+"type": "node"
+"step": "4"
+"name": "Compare text differences"
+"description": "Compare the relevant content in the employee handbook with the
+company’s latest announcement word by word"
+"tool": "compare_texts"
+"type": "finish"
+B.3 AMulti-StepToolCallsDatasetExamplewithRoutinesinShareGPTFormat
+"conversations": [
+"from": "human",
+"value": "Hi, I need to download the \"Employee Handbook 2023\" PDF from our
+company’s internal HR portal. Once I have it, I need to check if there
+are any updates in the handbook based on the latest announcements from
+the HR portal. Can you assist me with this?"
+"from": "function_call",
+"value": "{\"name\": \"fetch_latest_announcements\", \"arguments\": {\"
+portal_url\": \"https://company-hr-portal.com/announcements\"}}"
+"from": "observation",
+"value": "{\"announcements\": [\"New company policies will be effective from
+next month.\", \"Annual company picnic scheduled for September 15th.\",
+\"Employee of the month for August: John Doe.\", \"Reminder: Submit
+your performance reviews by the end of this week.\"]}"
+"from": "function_call",
+"value": "{\"name\": \"download_file\", \"arguments\": {\"url\": \"https://
+company-hr-portal.com/employee-handbook-2023.pdf\", \"destination_path
+\": \"/local/path/employee-handbook-2023.pdf\"}}"
+"from": "observation",
+"value": "{\"file_path\": \"/local/path/employee-handbook-2023.pdf\"}"
+"from": "function_call",
+"value": "{\"name\": \"read_pdf\", \"arguments\": {\"file_path\": \"/local/
+path/employee-handbook-2023.pdf\"}}"
+"from": "observation",
+"value": "{\"content\": \"Welcome to the 2023 Employee Handbook. This
+document outlines policies, procedures, and benefits available to
+employees. Chapter 1: Introduction. ...\"}"
+"from": "function_call",
+"value": "{\"name\": \"compare_texts\", \"arguments\": {\"text1\": \"Welcome
+to the 2023 Employee Handbook. This document outlines policies,
+procedures, and benefits available to employees. Chapter 1: Introduction
+. ...\", \"text2\": \"New company policies will be effective from next
+month.\\nAnnual company picnic scheduled for September 15th.\\nEmployee
+of the month for August: John Doe.\\nReminder: Submit your performance
+reviews by the end of this week.\"}}"
+"system": "
+You are an expert at calling functions (tools), and can accurately select
+and call the appropriate tool from the available tool set according to
+the user’s task to answer the user’s questions; You have a scenario
+workflow operation step called Routine. You need to select a tool to
+call based on the steps in the Routine and the completed historical
+steps; You have completed tool calls for similar scenarios before and
+have a memory of tool calls for similar scenarios. Now you can imitate
+the previous tool calls to select the tool you need to call now based on
+the historical dialogue information; Please strictly imitate the tool
+call instruction steps in the Routine, do not add tool call instructions
+that have not appeared in the Routine, and only output one tool call at
+a time; In the case of branches, please judge the branches of
+subsequent steps according to the conditions of each branch;
+Note: When temporary variable memory_xxx appears in the result returned by
+the tool result, it means that the value of the variable xxx is too long
+and is stored in the temporary variable memory. Try to fill in
+temporary variable memory_xxx instead of the actual value in the tool
+call parameters;
+# Routine
+To solve user questions, you need to refer to the following routines, select
+the tool you need to call, and make function calls based on the current
+progress and chat history. Please strictly follow the routines, do not
+skip any steps, and only output one function call at a time.
+The <routines></routines> XML tag provides you with the routine signatures
+of the workflow operation steps:
+<routines>
+Step 1. Get announcements: Download the latest employee handbook file from
+the company’s internal system, use the fetch_latest_announcements tool;
+Step 2. Download handbook: Obtain the company’s most recent official
+announcement for consistency check with the employee handbook, use the
+download_file tool;
+Step 3. Read PDF content: Use text parsing tools to extract all text content
+from the employee handbook PDF file, use the read_pdf tool;
+Step 4. Compare text differences: Compare the relevant content in the
+employee handbook with the company’s latest announcement word by word,
+using the compare_texts tool, and end the workflow;
+</routines>
+# Variables
+To ensure smooth information flow between each step, the system uses the
+following temporary variables to record intermediate results:
+<variables>
+</variables>
+"tools": "[{\"name\": \"compare_texts\", \"description\": \"Compares two sets
+of texts to find differences or updates.\", \"parameters\": {\"type\": \"
+object\", \"properties\": {\"text1\": {\"type\": \"string\", \"description
+\": \"The first text to compare (e.g., the existing handbook content).\"},
+\"text2\": {\"type\": \"string\", \"description\": \"The second text to
+compare (e.g., the latest announcements).\"}}, \"required\": [\"text1\", \"
+text2\"]}}, {\"name\": \"read_pdf\", \"description\": \"Reads the text
+content from a PDF file.\", \"parameters\": {\"type\": \"object\", \"
+properties\": {\"file_path\": {\"type\": \"string\", \"description\": \"The
+path of the PDF file to read.\"}}, \"required\": [\"file_path\"]}}, {\"
+name\": \"download_file\", \"description\": \"Downloads a file from a given
+URL to a specified local path.\", \"parameters\": {\"type\": \"object\",
+\"properties\": {\"url\": {\"type\": \"string\", \"description\": \"The URL
+of the file to download.\"}, \"destination_path\": {\"type\": \"string\",
+\"description\": \"The local path to save the downloaded file.\"}}, \"
+required\": [\"url\", \"destination_path\"]}}, {\"name\": \"
+fetch_latest_announcements\", \"description\": \"Fetches the latest
+announcements or updates from the given portal URL.\", \"parameters\": {\"
+type\": \"object\", \"properties\": {\"portal_url\": {\"type\": \"string\",
+\"description\": \"The URL of the portal to fetch announcements from.\"}},
+\"required\": [\"portal_url\"]}}]"
+
+## References
+
+1. pairsfrominstructionandresponse,yieldingsignificantgainsondifficultinstruction-followingtasks. ByteDancebuiltGuideBench[31],introducingguidelinerulesthatemulatedynamicallyevolving domain regulations. Experiments show that mainstream LLMs still struggle with fine-grained, domain-specificrules. Asanalternative,contextengineeringoffersalightweightwaytoimprove modelcompliancebystructuringpromptsandaddingtask-relevantcues. However,manualdesigns remainimpracticalandstrugglewithdeeplystructuredorbranchingtasks4. RoutinewasfirstintroducedintheOpenAICookbook[15]. AccordingtotheCookbook,Routine enablesthedecompositionofinstructionsintosmaller,manageabletasks,therebyreducingtherisk ofhallucinationsinLLMsandfacilitatingmoreeffectivecustomerservicesolutions. inourresearch, weaddedmorecomponentstoRoutineandfurtheroptimizeditsstructure,andwealsofocusedmore onthemodel’sproceduralinstruction-followingability. Byprovidingthemodelwithastructured Routineformatthatexplicitlyencodestheentireworkflow,weimproveitsstabilityinfollowingthe prescribedplan. ConstructingatrainingsetthatpairsinputswiththisRoutinerepresentationfurther enhancesthemodel’sabilitytogenerateoutputsthatconformtotherequiredstructure. 4https://github.com/davidkimai/Context-Engineering 3 Figure 2. Framework of our Routine-based agent system. To begin, the system uses expert- annotatedplanningpromptstogenerateRoutines. Duringruntime,itprocessesuserinputandsystem parameters,completingtasksthroughtheinteractionbetweenthemodules,andultimatelyprovidesa finalsummarybasedontheobservationfromadedicatedsummarizationtool.
+2. 2.3 ToolCallingDataSynthesisandPost-Training TrainingdataqualityandstructurearecrucialtotheperformanceofLLM.However,thecollectionof high-quality,human-annotatedscenario-specificdatasetsentailssubstantiallaborcosts. Acommon strategytotacklethisissueistopromptLLMstosynthesizetrainingdata,whichissubsequentlyused toenhancemodelperformancethroughtargetedpost-training[38]. Intoolcalling,datasynthesis pipelinesareessentialforconsistencyandeffectiveness. Tothisend,severalstudieshaveproposed datasetgenerationframeworks[39,40,41,42]. Beyondtheseefforts,Kimi-k2introducedascalable automated pipeline to simulate real-world multi-turn tool-use scenarios and generate large-scale, diverse,andhigh-qualitytrainingdatasets[43]. Theseframeworksprimarilyfocusongenerating tool-callingdatasetstoimprovemodels’abilitytoreadinputsandproducestandardizedtoolcalling commands,ensuringconsistentoutputoftoolcallinginstructionsalignedwithcommonlyaccepted structuralconventionsintheecosystem. Despitetheseadvances,commontool-usemodelsstillunder-performinscenario-specificscenarios. Whiletheymaintainconsistentoutputformatting,theyoftenstruggletoselectthecorrectfunctionsor parametersduetoalackofscenario-specificknowledge[38]. Promptengineeringandconstructing scenario-basedtrainingdatasetsusingknowledgedistillationcanbeusedtoaddresstheissue[44]. Distillingexpertknowledgeabouttoolselectionandparameterconfigurationintosmallermodels enableslightweightexpertagentstosolvescenario-specifictasks. Buildingonpriorworkinenterprise-leveltoolcalling,wepreviouslydevelopedatrainingpipeline toimprovesingle-stepfunctionexecutionbygeneratingtask-specificdatabasedonacuratedtool list[45]. Thepresentstudyextendsthatworkbyfocusingonmulti-steptoolcallingcapabilities. 3 AgentSystemFramework Anagentsystemtypicallycomprisesfourcoremodulesthatcollaborateonsoleusertasks: Planning, Execution,Tools,andMemory[2]. Whenataskisreceived,thePlanningModulegeneratesa step-by-stepplan. TheExecutionModulethenfollowsthisplan,generatingtheappropriatetool callinstructionforeachstep. TheToolModulereceivestheseinstructionsandreturnstheexecution 4 results [46]. The Memory Module assists the entire agent, improving execution coherence and enhancinggeneration. BasedonourRoutineandotheroptimizationmechanisms,wehaveredesigned thesefourprimarymodulestocreateanagentsystemcenteredaroundRoutinesandmulti-steptool callingmechanism. TheoverallarchitectureofthissystemisshowninFigure2. Inthissection,we willintroducehowwedesignthesefunctionalmodules.
+3. 3.1 PlanningModuleandRoutine Inoursystem,themainpurposeofRoutineistoenhancethestabilityofcommonmodelsinhandling scenario-specifictasks,therebyimprovingthemodel’sinstruction-followingcapabilitiestoincrease executionaccuracy. Table1. ThecomponentsofaRoutine. Note:Componentsmarkedwith*areoptionalelements. Component Description StepNumber Thesequentialnumberofthestepwithinthemainprocess. StepName Aconcisesummaryofthestep’spurposeorfunction. StepDescription Detailedinstructions,executionconditions,andobjectivesofthestep. InputDescription* Adescriptionoftheparametersrequiredforexecutingthisstep. OutputDescription* Theoutputparametersgeneratedaftersuccessfulexecution. StepTool* Thecorrespondingfunctiontoolusedinthisstep;onlyonetooliscalled.
+4. 3.1.1 RoutineComponentsandFormat A Routine is composed of multiple specific execution steps of sub-tasks, which are independent yetofteninterrelated. Therefore,aRoutineexecutionsequencemustcontainsufficientinformation fortheagenttoreliablyfollowtheplannedsteps. ThecomponentsofacompleteRoutineandtheir descriptionsforasub-tasksamplearedescribedinTable 1. Routines for similar scenarios may contain overlapping steps, differing only in certain process segments,similartodifferentbranchesofthesameworkflow. Insuchcases,similarscenarioscanbe mergedbycreatingbranchingstepsandexecutingconditionstodifferentiatebetweentheworkflows inonesingleRoutine. HereisanexampleofaRoutinewithbranches: StepX.<StepName>:Thisstepperformsabranchconditioncheck: • BranchX-1Step1. <StepName>: If<Condition>,perform<StepDescription>,usingthe<Tool Name>tool; • BranchX-1Step2.<StepName>:<StepDescription>,usingthe<ToolName>tool; • BranchX-2Step1. <StepName>: If<Condition>,perform<StepDescription>,usingthe<Tool Name>tool; StepY.<StepName>:<StepDescription>,usingthe<ToolName>tool; StepZ.<StepName>:<StepDescription>,usingthe<ToolName>tool,andterminatetheworkflow; Forinstance,abranchcanbedenotedas"BranchX-nStepi",representingthei-thstepwithinthen-th branchofmainstepX.Basedonthisnotation,theexecutionmodelcandetermineitscurrentbranch andpositionwithintheworkflow. Whenaworkflowterminatesafteracertainstep, thismustbe describedintheRoutineaccordingly. Thisstructuredformatensuresthateachplanningstepcontains clearandcompleteinformation,facilitatingprogresstrackingandtaskexecutionfortheagent. When aworkflowneedstobemodified,developerscanquicklyinsert,delete,oreditsteps,allowingfor agileadjustmentstothetaskplan. AnexampleofaRoutinecanbefoundintheAppendixB. 5 Figure3. AIOptimizationandManagementofRoutines
+5. 3.1.2 AI-PoweredRoutineGenerationandOptimization Whilegeneral-purposemodelscaneffectivelydeconstructproblemsintonaturallanguageRoutinesin open-endedscenarios,theystruggleinenterprisecontextsduetoalackofdomain-specificknowledge. ThismakesitdifficultforthemtodirectlyandreliablygeneratecontextualizedRoutineswithout assistancefromdomainexpertsorenterprisedocumentation. Toimproveefficiency,anexpertcanprovideasimpledraftpromptoutliningtheplanofaspecific scenario. Thisdraftisthenoptimizedbyamodelequippedwithaspecializedprompttemplate. The optimizationprocessinvolvesdecomposingtheplanintodetailedsub-steps,mappingthesestepsto availabletools,andfinallyoutputtingastructuredandcomprehensivenaturallanguageRoutinethat iseasyfortheexecutionmoduletofollow. TheoverallprocessingflowisshowninFigure3. The prompttemplateforthisAI-drivenoptimizationcanbefoundintheAppendixA.
+6. 3.2 ExecutionModuleandSmall-ScaleLLMs Theagent’sExecutionModuleisresponsibleforreceivingtheplanprovidedbythePlanningModule andfollowingitsprescribedpathtooutputtoolcallinginstructions. Inmostagentsystems, both planning and execution are handled by the same model. Due to the diversity and complexity of tasks,planningoftenrequireshighperformanceandconsumessignificantcomputationalpowerand inferencetime,requiringtheuseoflarge-scalemodels[47]. However,inenterprise-levelagentsystems,theexecutionprocessbringsalargeamountofcontext, includingnumerousdecisionnodesandavailabletools. Usingahigh-performancemodelforeach execution step consumes substantial resources and time, making it difficult to deploy in a real enterpriseenvironment[48]. FortheExecutionModule,thecorerequiredcapabilitiesaremulti-steptoolcallingandinstruction following,ratherthancomplexlogicalreasoningorabstraction. Therefore,theExecutionModulecan bedrivenbyasmaller,specializedinstruction-followingmodel. Thismodelisonlyresponsiblefor followingtheplanfromtheplanningmodelandoutputtingthecorrespondingtoolcallinginstructions. The execution model does not generate natural language responses; instead, a final summary is generatedbyadedicatedsummarizationtoolinthelaststep[49]. Thisseparationensuresthatthe prompttemplatesforsummarizationandtoolcallingdonotinterferewitheachother. Byprovidingapredefinedplan,anExecutionModulepoweredbyasmallspecializedmodelcansave significantresources,thusimprovingitsviabilityforreal-worldenterpriseagentapplications[50]. 6
+7. 3.3 ToolModuleandMCPServer TheToolModuleisresponsibleforreceivingtoolcallinginstructionsfromtheExecutionModule, usingthesetoolstoperformtasks,andreturningtheexecutionresults,therebyprovidingtheagent systemwithexternalinformation. Inoursystem,weuseMCPserversastheToolModule. TheMCP servernotonlyservesastheresourcefortheExecutionModulebutalsodefinesandmanagestheset oftoolsavailabletotheagent 5. MCPdefinestoolsinastructuredmannerwithitsprotocol. Eachtoolisuniformlydescribedbythis protocol,whichspecifiesitsname,parametertypes,andcallingconstraints. Theexecutionmodule simply retrieves the target function from the MCP tool set by step-by-step instructions from the PlanningModuleandfillsintherequiredparameters. Thisprotocol-basedstructurenolongerneeds tomanagetheimplementationdetailsofthetools. Consequently,theExecutionModuleonlyneeds todetermine"whichtooltocall"and"whatparameterstopass"basedontheplanprovidedbythe PlanningModule[51]. Furthermore,thestandardizeddesignoftheToolModuleprovidesthesystemwithextremelyhigh extensibility,makingiteasyfordeveloperstoaddnewfunctionsorconnectwithnewsystems. This allowsforadiverseecosystemoftools,includingvariousfunctions,models,otheragents,oreven userresponsestoassisttheagent. Inenterprisescenarioswithawidevarietyofcomplexandinteractivetools,theMCPToolModule effectivelydecouplestheexecutionlogicfromthetoollayer,creatingacleardivisionoflabor: the Tool Module provides stable and reliable function standards and interfaces, while an Execution Moduledrivenbyasmall-scalemodelcallsthesetoolsstep-by-step[50].
+8. 3.4 MemoryModule: ProceduresandVariables Agentsystemstypicallyprocessalargevolumeofcontext,includingsystemprompts,listsofavailable tools,andconversationhistory[52]. Thisimposesasignificantloadonthemodel: increasedcontext notonlyleadstohigherinferencecostsbutalsodecreasesthemodel’sattentionalaccuracy. This requiresaspecializedmemorystorageandretrievalmechanismthatprovidestheagentwithonlythe mostrelevantinformationforthecurrenttask[53]. Inouragentsystem,wehaveimplementedtwoformsofmemory: long-termProcedureMemory andshort-termVariableMemory.
+9. 3.4.1 ProcedureMemory ThroughtheAI-drivenRoutinegenerationandoptimizationprocess,thePlanningModulecreatesa collectionofRoutinesneededforagivenscenarioincollaborationwithdomainexperts. Eachgroup ofRoutinesinthiscollectionisdesignedtohandleaspecificsub-task. Sinceasinglescenariomay containmultiplesub-scenariosandtheircorrespondingRoutines,placingthisentirecollectioninto theexecutionmodel’ssystempromptwouldsignificantlyincreaseinferencecostsandcoulddecrease accuracybyintroducingirrelevantinformation[47]. Therefore, we established a Procedure Memory base for our agent system. Before deployment, expertspopulatethismemorybasewiththenecessarysetofRoutines. Whenthesystemreceivesa relevantquery,itretrievestheappropriateRoutine(s)frommemorybasedonasimilaritycalculation betweentheRoutine’sdescriptionandtheuser’stask,therebyassistingtheexecutionmodel[48].
+10. 3.4.2 VariableMemory In multi-step tool calling processes, the execution history gradually accumulates. The input and output parameters often occupy a large portion of the context window, leading to issues such as excessively long parameter values, excessive number of parameters, and redundant punctuation. These problems not only increase the pressure on the model’s context window and heighten the 5https://www.anthropic.com/news/model-context-protocol 7 probabilityofmodelhallucinations,butalsocausesmallermodelstomakesyntaxerrorsinvolving brackets,quotes,andescapecharacterswhenpassingparameters[53]. Toeffectivelyaddressthisissue,weintroduce ourVariableMemorymechanism,asshownin Figure4.Itscorefunctionistooptimizeparame- terpassingbetweenmulti-steptoolcalls. When atoolcallreturnsanexcessivelylongparameter, thesystemautomaticallystoresitinthevariable memory base. The model then only needs to providethecorrespondingkeywhenfillingin the tool parameters, rather than the full value. Uponreceivingthetoolcallrequest,theMem- oryModuleautomaticallyretrievesthesekeys backtotheiractualparametervaluesbeforepass- ingthemtothetool[53]. TheVariableMemory mechanism significantly reduces context pres- sure,anditalsoreducestokenconsumptionand improvessyntacticaccuracy. Itisimportanttonotethatthisvariablememory isnon-persistent;allrelatedvariablememories are used only for the execution of the current task. Thisdesignensuresthatmemoryremains lightweightandresponsive,avoidsunnecessary storage overhead and data accumulation, and guarantees the independence of each task execution [54]. Figure4. Aschematicdiagramofagent’svariable memorymechanism. 4 AgentExecutionModelTraining Common models can effectively execute Routines based on their generalized prompt-following capabilities. However,evenwhenthetoolsandparametersforeachsteparespecified,lightweight models remain susceptible to hallucinations, often leading to incorrect tool calls and parameter updates[47]. Toaddressthis,acommonRoutine-followingdatasetcanbeconstructedtoenhancethe executionmodel’sabilitytofollowinstructions. Inaddition,Routinescanserveastheprocedural knowledgefordatadistillation:Byusinghigh-capacitymodelsandRoutine,wecangeneratescenario- specificmulti-steptoolcalltrainingdata. Thisdistilleddatacanthenbeusedtotrainscenario-specific executionmodels,therebyreducingtheirrelianceonexplicitplanning[48]. Inthispaper,weexploretheimpactofthesetwotrainingstrategiesonimprovingthecapabilitiesof executionmodels,withtheaimofidentifyingthebestwaysforleveragingRoutine-basedplanningin real-worldscenarios[49]. Thecompleteprocessofmodeltrainingfromdatasynthesistoevaluation isbrieflyshowninFigure5.
+11. 4.1 ExperimentalScenarioSettingandUserQueries In this experiment, we selected a real-world enterprise scenario as the test setting: an HR agent applicationdeployedwithinalargecorporation(withmorethan8,000employees). Inthisscenario, HRusersinteractwiththeagenttoinquireaboutinformationrelatedtoemployeesanddepartments withinthecorporation.[45] TheHRagentscenariocomprisessevensub-scenarios,eachguidedbyadistinctRoutineusedto instruct the execution model in completing user queries, thereby requiring seven corresponding Routines. Inthisexperiment,wemanuallyannotatedallsevenRoutines. EachRoutineconsistsof 4–7toolcallingsteps,witheachtoolrequiring1–3inputparameters. Duetoparameterdependencies acrosstools,theexecutionorderofstepswithinaRoutinemustfollowaspecificsequence. Theagent hasaccesstoanMCPserverthatcontains25functionallydistincttoolswithdifferentfunctionalities, including data query, permission verification, and model generation. Some tools require system 8 Figure5. Theagentexecutesthemodeltrainingprocess. Thewholeprocessincludesthecommon Routinefollowingcapabilitytrainingandthescenario-specifictoolcallingcapabilitytraining,and canbedividedintothreemodules: datasynthesis,modelfine-tuningandmodelevaluation. parameterssuchascurrentuserID,whichareprovidedinthesystempromptpriortotaskexecution. Notably,3outofthe7Routinesintheevaluationscenarioinvolvebranchinglogic. Duringexecution, theagentmustevaluatethespecifiedconditionsandfollowtheappropriatebranchtocompletethe task. IfthesebranchingRoutinesarefurtherdecomposedintonon-branchingones,theHRagent systemscenariocanberepresentedas10distinctunbranchedRoutines. Inthefinalsummarizationstep,Routineguidestheexecutionmodeltocallasummarizationtool, ratherthandirectlygeneratingnaturallanguageoutputbytheexecutionmodelitself. Thistoolis pairedwithascenario-specificsummarizationtemplatetoensurethattheoutputremainsunaffected byothercomponentsofthesystemprompt. Oncetheexecutionmodelcallsthesummarizationtool, themulti-steptool-callingprocessiscomplete,andthetool’soutputisreturneddirectlytotheuser.
+12. 4.2 DataSynthesis
+13. 4.2.1 SystemPromptTemplateforExecutionModel Thesystemprompttemplateforsyntheticdatamustincorporateallnecessaryinformationrequired bytheexecutionmodeltoresolveatask. ItincludesRoutine-specificcontentsuchasroledefinitions, task,andbehavioralguidelines,alongwithsystemparameters,aRoutinetailoredtotheproblem,a variablememorydictionary,andatoollist–allorganizedinpreciseorderasthemodel’soperational context. ArepresentativeexampleofsuchasystempromptisprovidedintheAppendixA.
+14. 4.2.2 CommonDataSynthesis WesynthesizedgeneralizedRoutinesfromthetrainingdatausingtheBUTTONopen-sourcedataset (BUTTONInstruct)6,aimingtoenhancethemodel’srobustnessinRoutine-followingacrossdiverse scenarios, rather than focusing solely on the procedural steps of a single case. The BUTTON datasetcomprises8,000single-turn,multi-steptoolcallinstancesspanningabroadarrayofcommon tasktypes. Eachinstancealternatesbetweentool_callandobservationtoformaclearlystructured execution trajectory. Leveraging these records, we utilized GPT-4o with a specialized prompt templatetogeneratepreciseandstructuredRoutines: eachRoutineenumeratesthestepindexand name, functional objectives, and the corresponding tool name. We then constructed new system prompts based on a standardized execution prompt template to improve adaptability to various workflowmechanisms. Subsequently,weperformedtargeteddatafilteringtooptimizetrainingefficiencyandmodelperfor- mance. SpecificoptimizationsareillustratedinFigure6andinclude: 6https://github.com/PKU-Baichuan-MLSystemLab/BUTTON 9 Figure6. ThecommonRoutine-followingdatasetfilteringpipeline.
+15. 1. RoutineTextVerification: BasicverificationofgeneratedRoutinetexts,discardingentrieswith emptyresponsesorabnormaloutputs.
+16. 2. RemovalofNaturalLanguageSummaries: Asfinalagent-levelsummariesaredelegatedtoa specializedsummarizationtool,weremovedallnaturallanguagesummariessteps,retainingonly userqueries,toolcalls,andcorrespondingobservationstostabilizetoolcallingoutputs.
+17. 3. LengthandStructureFiltering: Weexcludedinstanceswithmorethaneighttoolcallsteps to prevent excessive computational load and removed any instances containing nested lists, dictionaries,orothercomplexdatastructurestomaintainformatsimplicityandsymbolicaccuracy. Basedonthesefilteringprocedures,weretained4,209high-quality,lightweighttrainingdata,which aimtostrengthenthemodel’scapabilityforfollowingRoutineindifferentspecificscenarios.
+18. 4.2.3 Scenario-SpecificRoutineKnowledgeDistillation Besidesservingassystempromptstoprovidescenarioknowledgetoexecutionmodels,Routines canalsobeusedasmaterialsforknowledgedistillation[55]. Basedonuserquerieswithinspecific scenarios,Routinescanbeincorporatedintothesystempromptofateachermodeltogeneratestable, multi-steptoolcallingrecords. Theseoutputscanthenbeusedtotrainalightweightstudentmodel, enablingtheagenttocompletemulti-steptoolcallswithinascenariowithoutrelyingonexplicit Routine. To create a set of user queries in the HR agent scenarios, we designed 5–6 user query templates foreachof10distinct, non-branchingsub-scenarios. Byfillingoutthesetemplateswithvarious departmentandemployeeinformation,eachsub-scenarioyieldedapproximately50–60uniqueuser queries. Afterdatacleaning,weobtainedatotalof537userqueries. Tofurtherenhancedatadiversity andimprovethegeneralizationabilityofthemodel,weperformeddataaugmentationbyusingLLM togeneratesemanticallyequivalentvariationswithdifferentphrasing,whichimprovesthemodel’s robustness. Then, weusedGPT-4oequippedwithRoutinestodistillasetof537single-turn, multi-stepuser queriesfortheHRagentsystemscenarioafterdatacleaning. Eachsampleincludes4–7toolcalling steps,totaling3108labeledtoolcallinginstructions,whichwereusedtotraintheexecutionmodel inaspecific-scenario. Inaddition,wedistilledasetof200single-turn,multi-stepscenario-based 10 userqueries,totaling1,148toolcalls. Thisdatasetwasusedtoevaluatemodelperformanceacross differentvariants.
+19. 4.3 ModelTraining
+20. 4.3.1 BaseModelSelectionandSetting IntheHRagentscenario,theexecutionmodelneedstohaveacertainlevelofinstruction-following andpreliminarytool-callingcapability,aswellasastrongChineseunderstanding. Inaddition,the execution model requires a small number of parameters, maintaining the efficiency of the agent systemintermsofcomputingresourcesandtimeconsumption. Therefore,weselectqwen2.5and qwen3seriesofsmall-scaleInstructmodelsfortraining. Whentrainingtheqwen3seriesmodels,we didnotenablemodelreasoningtraining,becausethetraininggoalismainlytoimprovethemodel’s abilitytofollowRoutine,andthereisnoneedtoutilizethinkingtoinferthetoolcallsinstruction, therebysavingthetokensofmodelreasoning. Weadded<routines>,</routines>,<variables>,</variables>tothespecialtokenstoappendRoutine fieldsandstorevariablememories. Registeringtheminthevocabularycanmakethemeffectively recognizedbythemodelandimprovethestabilityofmodeltraining.
+21. 4.3.2 LoRAFine-tuningSetting To avoid overfitting and maximize ROI under enterprise-level computational constraints, we adopted LoRA, a lightweight fine-tuning strategy, aiming for cost-efficient adaptation on small- scaledatasets[56]. Our experiments utilized the LLaMA-Factory framework with DeepSpeed ZeRO-3 and Flash Attention-2, which can maximize computational efficiency and significantly reduce GPU mem- oryusageduringmulti-GPUtraining[57][58]. Toenhancethemodel’sabilityincomprehending andreasoningoverstructureddatainbusinessscenarios,weadjustedthemaximumsequencelength toexceedtheactualinputlengthinallcases,therebyensuringthepreservationofcriticalstructural informationlikemulti-steptoolcallchainsduringpreprocessing. Wecreatedtwofine-tuningdatasets: ascenario-specificHRagentdatasetcontaining537instances andageneraldatasetwith4,209filteredinstances. ModeltrainingwasperformedonfourNVIDIA A10 GPUs (24GB VRAM each), with a LoRA rank of 8, batch size of 1 per GPU, and gradient accumulationstepssetto4,resultinginaneffectivebatchsizeof16perupdate. Thelearningrate wassetto1.0e-4withawarm-upratioof0.1. Basedonvalidationperformance,thefinalmodelwas selectedfromthecheckpointatepoch3,strikingabalancebetweenscenario-specificadaptationand generalizationcapability. 5 EvaluationandAnalysis
+22. 5.1 EvaluationMethodology
+23. 5.1.1 EvaluationFrameworkandProcedure Tocomprehensivelyandautomaticallyevaluatetheexecutionmodel’sabilitytohandlemulti-step toolcalls,wechoosetheopen-sourceBerkeleyFunction-CallingLeaderboard(BFCL)asourcore evaluationframework,primarilybasedonitsFunction-Calling(FC)modeandAbstractSyntaxTree (AST)evaluationmethod. Itoffersthedualadvantagesofevaluationefficiencyandpreciseerror attribution: itsspeedisnotaffectedbytoolresponselatency,whileitalsoprovidesadetailedanalysis ofvariouserrorsourcesinthemodel’stoolcallinginstructions[59]. TheASTevaluationprocessfollowsahierarchicalorder,andwefurthercategorizetheresultsinto threemainevaluationmetricstocalculateindividualaccuracyratesandoverallaccuracy: • StructuralError: ThemodeloutputisfirstcheckedforvalidJSONformatting. Errorsinclude missingbrackets,punctuationerrors,andotherissuesthatcouldcauseASTparsingtofail. 11 Figure7. ASTevaluationworkflowforourenterprisescenario. Theprocessismainlybasedonthe BFCLframeworkwithcategorizingerrorsintothreeprimarytypes: structural,toolselection,and parametererrors. Note: Thecontentoffreetextparametersisnotassessedviaexactmatchingduring parameterevaluation. • Tool Selection Error: If the structure is valid, the tool choice is evaluated. Errors include outputtingnaturallanguageinsteadofusingatool,callingincorrectnumbersoftools,orwrong tools(e.g.,confusingsimilartoolsornonexistentones). • ParameterError: Includesthreesubcategories: incorrectparametervalues,parameterhalluci- nation(fillinginparametersthatdonotexistinthetooldefinition,andmissingkeyparameters.) Note: Thisdoesnotcoverthedetectionofcontentfromafreetextparameter. • OverallAccuracy: Acaseiscountedascorrectonlyifallsteps(structure,tool,andparameters) areentirelyaccurate. Overallaccuracyisthemoststringentmeasureofthemodel’send-to-end problem-solvingability. The evaluation procedure is hierarchical as shown in Figure 7. The model output is prioritized forstructuralaccuracysinceastructuralfailurepreventstheparsingoftoolsandparameters. The selectionoftoolsisthenassessed. Finally,theparametercorrectnessisjudgedonlyiftheprevious stepsaresuccessful. Thishierarchyisalsoreflectedinourstatisticalanalysis: thestructuralaccuracy iscalculatedonallsamples,thetoolselectionaccuracyiscalculatedonthestructurallycorrectsubset, andtheparameteraccuracyiscalculatedonthesubsetwherebothstructureandfunctioncallswere correct. Thisensuresanobjectivemeasureoftheactualaccuracyforeachcategory. Weespecially implementapproximatematchingforfreetextparametersthatarefrequentlypassedinthisenterprise scenario. Rather than checking the exact value of parameters, it focuses on verifying parameter existence,illusion,andtypes. Slightphrasingdifferencesinlongnaturallanguageparameters(e.g. userneed-queryv.s. userneed: query)donotsignificantlyalterthesemanticmeaningbutwouldfail thestrict-matchingtest,leadingtoanunderestimationofthemodel’scoreabilities. Theapproximate matching allows the evaluation system to focus more on the model’s performance in instruction structure, tool selection, and key-parameter passing, providing a more objective reflection of its comprehensivetoolcallingcapabilities.
+24. 5.1.2 TestDataSynthesis Weconstructedaspecializedevaluationdatasettoaccuratelyassessthemodel’sperformance. Using themodeldistillation,wegenerateda200single-turn,multi-stepevaluationdatasetfromtheHR agentscenarios. Thedatawerethendecomposedinto1,148individualtestsamplesforourautomated evaluation framework. Based on optimizations to the execution module, we focus on two key principlestoensurefairnessandvalidityduringthedecompositionprocess: 12
+25. 1. DecompositionofTestSamples: Eachfullexecutiontracefromthedistillationprocesswas splitintomultiple,independenttestsamples. Everysampleincludesthehistoryofexecution stepsprecedingthecurrentone,aswellasthespecificsystempromptforthecurrentstep.
+26. 2. RecordsofSystemPrompt: Duetothemechanismforstoringtemporarymemoryvariables, thesystempromptreceivedbytheagentcanbedynamicallyupdatedateachexecutionstep. We storethestateofthesystempromptateverysteptofullypreservetheagent’shistorycontext. Thisensuresthatthemodelisevaluatedwiththeexactcontextitwouldhaveinarealcontinuous interaction,whichisessentialforaccurateanalysisofthemodel’stoolcallabilityandrelated errors[60] Furthermore,werandomizedthesequenceoftoolsinthelistprovidedforeachtestsampletoensure thatthemodeldemonstratesatrueunderstandingofthetoolsratherthanrelyingontheirorder. This preventsthemodelfromdependingonpositionalbiasesandhelpstoguaranteethegeneralization abilityofourfindings[61].
+27. 5.1.3 TestConfiguration Tocomprehensivelyexaminethemodel’sperformanceunderdifferentRoutineconfigurations,we generatethreedistinctevaluationscenariosfromtheoriginal1,148testsamplesbymodifyingthe Routinecomponent:
+28. 1. No-RoutineScenario(Baseline): Theexecutionmodelonlyreceivestheuser’squeryandmust autonomouslyunderstandtheintent,deviseaplan,andcompletethetoolcalls. Thisservesasour baselineforevaluatingthemodel’sinherentcapabilitiesandforcomparisonagainstoptimization effects.
+29. 2. Routine-Guided Scenario w/o Branches: The model is provided with a structured, linear Routine in natural language that outlines a clear path to the solution without any complex conditionalbranches. Thisteststhemodel’sinstruction-followingcapabilitywhengivenexplicit linearinstructions.
+30. 3. Routine-GuidedScenariow/Branches: Thisscenarioalsoprovidesthemodelwiththesame Routine, but it includes conditional branches that require the model to make judgments and selections based on the results of intermediate steps. It is designed to evaluate the model’s executionstabilityandlogicalreasoningwhenhandlingmorecomplexnon-linearworkflows. In these tests, the Routine consists of the step number, name, description, and tool, but does not includeinput/outputparameterdescriptions. TheimpactofdifferentRoutinecomponentsisfurther exploredinthefollowingablationstudies.
+31. 5.2 ResultsandDiscussion Forthisexperiment,weselectedavarietyofleadingindustryfoundationmodelsfortesting,including proprietarymodels: GPT-3.5-Turbo,GPT-4-Turbo,GPT-4o,andClaude-3.7-Sonnet,aswellasthe originalversionsofopen-sourceQwenseriesmodels: Qwen-2.5-7b-Instruct,Qwen-2.5-14b-Instruct, Qwen-3-8b,andQwen-3-14b. Theexperimentalsoevaluatedtheeffectsoftrainingforcommon Routinefollowingandtheimpactoftrainingonmulti-steptoolcallingdatathatwasdistilledusing Routine. Themodeltrainingstrategiesaredefinedasfollows: • CommonRoutinefollowingfine-tuning:Basedon4,209samplessynthesizedcommontraining dataset,aimtoimprovethemodel’sgeneralizedabilitytofollowthestructuredRoutine. • Scenario-specifictoolcallingfine-tuning: Basedon537single-turn,multi-steptoolcalling datasamplesdistilledfromthetargetscenario,aimtodirectlyimprovethemodel’sabilitytouse thescenario’stoolsformulti-steptoolcalls.
+32. 5.2.1 ImpactofRoutineonLLMToolCallingPerformance WithoutRoutineguidance,allbaselinemodelsperformedpoorly,withnoneexceeding50%overall accuracy. Thisindicatesthatevenfortopmodels, relyingentirelyontheirautonomousplanning abilityforcomplex,multi-steptasksintroducessignificantuncertainty. Toolselectionerrorswere identifiedasthemaincauseoffailure,accountingforover85%ofallerrors. Thisfindingreveals 13 Table2. OverallaccuracyofmodelsunderdifferentRoutineconfigurationsinHRagentsystem scenario. Thefine-tunedmodelsarecategorizedbytheirtrainingdataset: Commonreferstomodels trainedonthecommonRouting-followingdataset,whileScenarioreferstomodelstrainedonthe distilledmulti-steptoolcallingdataset. Training NoRoutine Routinew/Branch Routinew/oBranch Model Dataset Structural Tool Parameter Overall Structural Tool Parameter Overall Structural Tool Parameter Overall GPT-3.5-Turbo \ 99.8 26.0 95.3 22.1 99.8 53.8 98.2 52.7 99.9 59.7 98.1 58.5 GPT-4-Turbo \ 100 44.6 97.5 43.5 100 99.1 99.8 99.0 100 98.7 99.6 98.3 GPT-4o \ 100 42.2 97.3 41.1 100 96.3 99.9 96.3 100 97.0 99.9 97.0 Claude-3.7-Sonnet \ 97.7 46.5 96.6 43.9 100 99.7 99.7 99.3 99.2 99.6 99.3 98.0 Qwen2.5-7B \ 99.7 15.6 95.5 14.9 98.6 51.4 98.1 49.7 98.5 57.9 98.6 56.3 Qwen2.5-14B \ 99.3 20.3 96.5 19.4 97.8 83.4 96.9 79.1 98.4 82.7 97.2 79.2 Qwen3-8B \ 99.2 37.3 95.3 35.3 99.2 83.9 97.6 81.3 99.0 84.8 96.8 81.3 Qwen3-14B \ 94.1 36.5 94.9 32.6 96.0 88.3 98.3 83.3 97.0 87.8 98.2 83.6 Qwen2.5-7B Common 93.6 25.1 95.2 22.4 97.6 89.0 98.6 85.7 96.9 90.7 98.7 86.8 Qwen2.5-14B Common 91.1 34.6 98.1 30.9 97.2 90.0 98.4 86.1 97.6 94.3 98.8 90.9 Qwen3-8B Common 95.3 26.3 93.4 23.4 96.3 88.3 97.2 82.8 97.4 94.4 97.2 89.3 Qwen3-14B Common 97.3 35.1 97.2 33.2 98.2 92.0 97.7 88.2 99.0 94.8 98.8 92.7 Qwen2.5-7B Scenario 99.7 88.8 99.1 87.8 99.7 94.1 99.7 93.5 99.7 95.2 99.5 94.4 Qwen2.5-14B Scenario 99.8 88.1 99.4 87.5 100 97.9 99.6 97.5 99.8 98.4 99.8 98.1 Qwen3-8B Scenario 100 89.4 99.4 88.9 99.8 94.4 99.3 93.6 99.9 96.9 99.3 96.2 Qwen3-14B Scenario 99.7 90.9 99.4 90.2 99.7 95.9 99.9 95.5 99.7 98.3 99.9 98.0 thehugechallengemodelsfaceinaccuratelyselectingfromalargepoolofavailabletools(over25) andorganizingthemintoaneffectiveexecutionchainwithinaspecializeddomain. TheintroductionoftheRoutinemechanismledtoasubstantialimprovementinthemodels’end-to- endtoolcallingaccuracy. Inparticular,GPT-4-Turbo’sperformanceapproachedperfection,andthe Qwenseriesmodelsalsodemonstratedsignificantgains. Thisindicatesthatsettingawell-defined Routineplancansignificantlyreducetheuncertaintyinamodel’sexecutionprocess. TheRoutine mechanismcanthereforeeffectivelycompensatefortheplanningdeficienciesofsmallermodels, enablingthemtoachieveperformanceclosetotopmodelsinspecificscenarios. Ananalysisofthe errordistributionconfirmsthattheimprovementintoolselectionaccuracyisthemaindriverof theoverallaccuracyincrease. ThissuggeststhatRoutineeffectivelyguidesmodelstoselectthe correcttoolsbydecomposingtasksintoclear,actionablesteps. Structuralandparametererrorsalso sawconcurrentimprovements;althoughtheseerrorswerelessfrequentinbaselinetests,theywere furtherminimizedunderRoutineguidance. Acomparisonofthew/Branchandw/oBranchRoutinescenariosrevealedthatperformancewas generally higher in the w/o Branch scenario. The performance difference was small for high- performingmodels. However,formodelswithaverageperformance,theintroductionofbranches ledtoamorepronounceddeclineinaccuracy. Thissuggeststhattheuseofbranchinglogicwithin Routinesismosteffectivewhenbuiltuponamodel’salreadyrobusttoolcallingfoundationtoavoid performancedegradation.
+33. 5.2.2 ImpactofModelTraining TheexperimentalresultsinTable2showthatfine-tuningwiththecommonRoutinefollowingdataset effectivelyimprovesthemodel’sexecutionaccuracywhenaRoutineisprovided. Comparedtotheir baselines,thesemodelsshowedsignificantimprovementsacrossallmetricsinthew/Routinescenar- ios. However,undertheNoRoutineconditionthatrequiresautonomousplanning,theperformanceof thesefine-tunedmodelsdeclined,indicatingatrade-offwheretheircommonproblem-solvingability wasreduced. Thisisbecausethestrategyreinforcesthemodel’sroleasaplanexecutorbutdoesnot enhanceitscorecapabilityasanautonomousplanner. In contrast, fine-tuning via scenario-specific data distillation achieved a significant improvement inoverallaccuracyundertheNoRoutinecondition,withperformanceexceedingoriginalmodels evenwhentheywereguided byRoutine. Thisindicatesthat forsmallermodels, using ateacher modelguidedbyaRoutinetodistilldatafortrainingallowstheproceduralknowledgetobedirectly internalizedwithinthestudentmodel,reducingthemodel’srelianceonanexplicitplan. Furthermore, whenaRoutineisprovidedtothesealready-specializedmodels,theiraccuracyisenhancedeven further,approachingthelevelofGPT-4oanddemonstratinghighlystableexecution. Thisconfirms 14 thatinjectingproceduralknowledgebothinternally(viaweights)andexternally(viaprompts)isan effectivestrategyformaximizingthemodel’sstabilityinatargetscenario.
+34. 5.3 AblationStudy HavingestablishedtheeffectivenessofRoutine,weconductedaseriesofablationstudiestoexplore theimpactofdifferentRoutinemechanismsettingsonoverallaccuracy. Thesestudiesfocusedon threemainareas: thecomponentsoftheRoutine,themethodofRoutineannotation,andthequantity ofRoutinesprovided.
+35. 5.3.1 AblationonRoutineComponents We investigated the specific impact of a Routine’s different internal components on the model’s finalexecutionaccuracy,primarilytestingtheeffectsoftoolspecificationsanddetailedinput/output parameterdescriptions. Weestablishedthreeexperimentalconditionsunderthecomplexwithbranch scenario: • Baseline: ThemodelreceivesacompletenaturallanguageRoutinewithstepdescriptionsand toolnames,butwithoutdetailedparameterguidance. • WithI/ODescriptions: Buildingonthebaseline,detaileddescriptionsoftheinputsourceand expectedoutputareaddedtoeachstep. • WithoutToolName: Buildingonthebaseline,thedirectinstructionspecifyingwhichtoolto selectisremovedfromeachstep,requiringthemodeltoinfertheappropriatetoolfromthestep’s description. Testsonrepresentativemodels(Table3)revealthedistinctimpactofRoutinecomponents: Table3. OverallModelAccuracyonDifferentRoutineComponents Model BaselineRoutine Routinew/I/OParams Routinew/oTools GPT-3.5-Turbo 52.7 61.1 42.8 GPT-4o 96.3 97.5 96.7 Qwen2.5-7b 49.7 60.6 43.7 Qwen2.5-14b 79.1 84.2 69.5 Qwen3-8b 81.3 81.3 76.7 Qwen3-14b 83.3 81.5 71.9 Addingdetailedparameterdescriptionshadavariedeffect. Forlesscapablemodels,thisexplicit guidancewashighlyeffective,improvingtheircontextualunderstandingandsignificantlyreducing parametererrors. Forhigh-performancemodels,theadditionaldetailhelpedinmakingmorerobust judgmentsinedgecases,leadingtoincrementalperformancegains. Interestingly,theQwen3series models appeared largely insensitive to this addition, suggesting that for some architectures, the baselineRoutinealreadycontainsenoughcontextforparameterinference,andfurtherverbositymay interferemodel. Overall,includingI/OparameterdescriptionsinRoutineisaneffectivestrategy forimprovinganagent’sstabilityandapplicability,asitoffersessentialcontextformoderately capablemodelsandprovidesminorbenefitsevenforleadingmodels. The result confirms that explicitly specifying the tool name within Routine is a core element forensuringaccurateexecution. Whenthetoolnamewasremoved,allmodelsexceptthehighly stableGPT-4oexperiencedasignificantdropinaccuracy(typicallyby5%-15%). Thisdemonstrates that providing the tool name transforms a difficult reasoning problem which tool to use into a straightforwardexecutiontaskusethistool,therebyreducingthecognitiveloadrequiredtounderstand thetasklogic. WhileGPT-4odemonstratedexceptionalsemanticunderstandingbyinferringthe correcttoolfromthestepdescriptionalone,thiswasanoutlier. Forthemajorityofmodels,explicitly specifyingthetoolwithintheplanprovedtobehighlybeneficial. Basedonthisanalysis,weconcludethatawell-designedRoutineshouldfunctionasastructured execution plan containing both explicit tool instructions and sufficient descriptions, such as I/O parameters. This ensures the agent can complete tasks with maximum stability and accuracy, regardlessoftheunderlyingdrivingmodel’scapabilities. 15
+36. 5.3.2 ImpactofAI-OptimizationMechanism In practice, there are different ways of agent planning, as shown in Figure 8. Using a manual Routinebringshighrobustness,butitsannotationiscostlyandunscalable. Therefore,weexplored AI-drivenoptimizationasapracticalalternative. ThisablationstudycomparedtheRoutineofvarying refinementlevels: • User-DraftedRoutine: Aninitial,incomplete,andunstructurednaturallanguagepromptfrom auser,containingonlythebasicsequenceofsteps. Thisisthestartingpointforevaluatingthe effectivenessofoptimization. • AI-OptimizedRoutine: Theuserdraftisautomaticallycorrected,completed,andrefinedby GPT-4oandsetsacorrespondingtoolselectionforeachstep,formingamorelogicalandcomplete naturallanguageRoutine. • ManuallyAnnotatedRoutine: AcompletenaturallanguageRoutinewithbranches,meticu- louslyannotatedandcalibratedbydomainexperts. • ValueoftheInitialDraft: Evenalow-qualityuserdraftimprovedmodelexecutionaccuracy. Thisdemonstratesthatevenaroughplanprovidescrucialguidanceformodelsandoutperforms fullyautonomoustoolcallinginspecializeddomains. Testsonrepresentativemodels(Table4)revealthedistinctimpactofdifferentRoutinegeneration methods: Table4. OverallmodelaccuracyondifferentgenerationmethodsofRoutine Model UserDraft AIOptimization HumanAnnotation GPT-3.5-Turbo 42.6 52.9 52.70 GPT-4o 71.2 90.9 96.3 Qwen2.5-7b 46.6 50.4 49.7 Qwen2.5-14b 61.7 82.3 79.1 Qwen3-8b 70.4 73.8 81.3 Qwen3-14b 70.9 76.7 83.3 The AI optimization step brought sig- nificant and universal performance im- provements. The performance of GPT- 4o, bridgedmostofthegapbetweenba- sic usability and high reliability. The Qwen3seriesmodelshavealsoachieved stable improvements. Some models even achieved higher accuracy with AI- optimizedRoutinethanwiththemanually annotatedbaseline,possiblybecausethe AI-optimizedformatwasmoreeasilyun- derstoodbythosemodels.Thisshowsthat usingAItorefineauser-draftedRoutine isanefficientandviablepathwayforen- Figure8. DifferentwaysofAgentPlanning terprisescenarios. However,themanuallyannotatedbaselinestillproducedthehighestaccuracyforhigh-performance models. Thedetailsprovidedbyhumanexpertsremaincrucial,asthesemodelsarecapableenough to benefit from these subtle details. Therefore, in real-world applications, a final review of the AI-optimizedRoutinebydomainexpertsisstillrecommended.
+37. 5.3.3 AblationonRoutineQuantity An agent system often needs to handle multiple sub-scenarios, requiring a library of Routines. LoadingallRoutinesintothesystempromptwouldconsumealargecontextwindow. Toaddress this,thesystemcanimplementaprocedurememoryrecallmechanisminthememorymoduleas mentioned in Section 3.4. However, recalling a single Routine can easily cause precision issues, 16 whilerecallingmultipleRoutinescanintroducenoisefrominterferingRoutinesthataresimilarbut notperfectlyapplicable. Thisstudyteststhemodel’sstabilitywhenfacedwithmultiplecandidate Routines. Thesetupisasfollows: • Baseline(1Routine): ThemodelreceivesonlyonecorrectRoutine. • Multi-RoutineInterferenceScenario: Themodelisprovidedwith2,3,or5Routinesintotal, eachlabeledwithitsnameandfunction. Onlyoneisapplicable;therestareinterferencesthatare notrelatedtothissub-scenario. TheorderofRoutinesisshuffledtopreventpositionalbias. The results of the tests are shown in (Table 5), which reflects the impact of multiple numbers of Routines: Table5. OverallmodelaccuracyonmultiplenumbersofRoutines Model 1Routine(Baseline) 2Routines 3Routines 5Routines GPT-3.5-Turbo 52.7 53.6 54.7 60.0 GPT-4o 96.3 76.6 80.1 88.6 Qwen2.5-7b 49.7 45.1 45.0 54.4 Qwen2.5-14b 79.1 55.8 60.7 71.3 Qwen3-8b 81.3 66.0 66.9 72.2 Qwen3-14b 83.3 63.2 67.2 79.9 Theresults(Table5)showthatprovidingasinglecorrectRoutineismosteffectiveforhigh-performing models. Theiraccuracydroppedsignificantlywhenevenonedistractorwasintroduced. However,as thenumberofrecalledRoutinesincreased,theaccuracybegantorecover. Wehypothesizeashift inthemodel’sbehavior: whenfacedwithasmallnumberofconflictingRoutines,itmayattempt tocombinetheirsteps,leadingtoerrors. AsthenumberofRoutinesincreases,itmayswitchtoa selectionmechanism(similartotoolselection),identifyingandexecutingthemostrelevantRoutine, thusimprovingperformance. Performance fluctuations are greater for smaller models, sometimes even increasing with more numbersofRoutines. Webelievethatthisiscausedbyoverlappingsub-stepsofsomeRoutines. As moreRoutinesarerecalled,thesecommonsub-stepsrepeatedlyappear,whichmaycausethemodel toallocateextraattentiontothem. Thisrepetitionimprovestheexecutionaccuracyofthesespecific sub-stepsforlesscapablemodels,resultinginanincreaseintheoverallscenarioaccuracy. Theexperimentindicatesthatanagent’smemorymodulemustbecarefullydesignedandoptimized toachievehighprecisionandrecall,aimingtoprovideonlyonesingleandmostrelevantRoutineto theexecutionmodeltoenhancesystemefficiencyandstability. 6 LimitationandFutureWork The Routine mechanism we proposed has demonstrated its effectiveness in enhancing an agent system’s ability to solve tasks via multi-step tool invocation within specific scenarios. However, currentplanningmodelsprimarilyrelyondraftsprovidedbydomainexpertstogenerateRoutine flows, whileexecutionmodelsaremostlyadaptedthroughinstructionfine-tuningviaknowledge distillation. Thisreliancelimitsthesystem’sgeneralizationcapabilitywhennewtoolsareintroduced orworkflowchangesoccurwithinenterpriseenvironments,leavingroomforimprovementinagent autonomyandadaptability. Toaddressthischallenge,incorporatingRL-basedagentframeworksintotheworkflow,including mechanismsfordatadistillationandrewardmodelingmightbeapossiblesolution. Thisapproach aimstoimprovetheRoutinegenerationcapabilityoftheplanningmodelaswellasthetoolinvo- cationcapabilityoftheexecutionmodel. Thecombinationofinstructionfine-tuningforcoldstart and reinforcement learning has shown promising potential in improving both generalization and adaptabilityinscenario-basedtasks,andmayemergeasafutureparadigmfortrainingagent-based languagemodels[62]. Furthermore,weaimtoexploreamulti-agentframeworkcenteredaroundtheRoutinemechanism,in whichahigh-levelagentcoordinatesmultiplespecializedagentsthroughasetofstructuredRoutine 17 flowsandcentralizedinteractionprotocols. Wehypothesizethatthishierarchicalinteractionscheme caneffectivelyreducethecomplexityandlengthofindividualRoutineplans,therebyenablingmore stable and intelligent execution of enterprise workflows. Through this line of research, our goal istodevelopmoreintelligent,robust,andadaptiveLLM-basedagentscapableofleveragingtools efficientlytosolvecomplexuserproblemsindynamicenterpriseenvironments. 7 Conclusion Inthispaper,wedesignRoutine,astructuredandcomprehensiveplanningframeworkforguiding multi-step tool execution in agent systems. Using Routine, we investigate how well-defined plans improve the accuracy of the model’s multi-step execution. We also synthesize a training dataset to enhance Routine distillation capabilities and generate domain-specific, multi-step tool-calling datasets via Routine-based distillation. Our experimental results demonstrate that Routines significantly improve the execution model’s accuracy, improving the performance of the Qwen3-14b model by approximately 50%, from 32.6% to 83.3%. This accuracy is further increased after fine-tuning the model for Routine following. Furthermore, by using Routines to distilltrainingdatasetsforscenario-specificfine-tuning,theperformanceofQwen3-14bhasbeen improved to 95.5%, which is comparable to GPT-4o, enabling smaller models to achieve high and stable accuracy in enterprise scenarios. In conclusion, the Routine mechanism significantly improvestheadaptabilityofagentsystemstoenterprisescenarios. ItallowsAItoassistmoreeffec- tivelyintheexecutionofenterpriseprocesses,therebyrealizingthetechnicalvisionofAIforProcess. References
+38. [1] MichaelWooldridge. AnIntroductiontoMultiAgentSystems. JohnWiley&Sons,2ndedition,
+39. 2009.
+40. [2] LeiWang,ChenMa,XueyangFeng,ZeyuZhang,HaoYang,JingsenZhang,ZhiyuanChen, JiakaiTang,XuChen,YankaiLin,WayneXinZhao,ZheweiWei,andJirongWen. Asurveyon largelanguagemodelbasedautonomousagents. FrontiersofComputerScience,18(6),March
+41. 2024.
+42. [3] Sirui Hong, Yizhang Lin, Bang Liu, Bangbang Liu, Binhao Wu, Ceyao Zhang, Chenxing Wei,DanyangLi,JiaqiChen,JiayiZhang,JinlinWang,LiZhang,LingyaoZhang,MinYang, Mingchen Zhuge, Taicheng Guo, Tuo Zhou, Wei Tao, Xiangru Tang, Xiangtao Lu, Xiawu Zheng,XinbingLiang,YayingFei,YuhengCheng,ZhibinGou,ZongzeXu,andChenglinWu. Datainterpreter: Anllmagentfordatascience,2024.
+43. [4] ShishirG.Patil,TianjunZhang,XinWang,andJosephE.Gonzalez. Gorilla: Largelanguage modelconnectedwithmassiveAPIs. arXivpreprintarXiv:2305.15334,2023.
+44. [5] ThaynáCamargodaSilva. Extractingknowledgegraphsfromuserstoriesusinglangchain,
+45. 2025.
+46. [6] MinjieShenandQikaiYang.Frommindtomachine:Theriseofmanusaiasafullyautonomous digitalagent,2025.
+47. [7] EserKandogan,NikitaBhutani,DanZhang,RafaelLiChen,SairamGurajada,andEstevam Hruschka. Orchestratingagentsanddataforenterprise: Ablueprintarchitectureforcompound ai,2025.
+48. [8] RuixuanXiao,WentaoMa,KeWang,YuchuanWu,JunboZhao,HaoboWang,FeiHuang,and YongbinLi. Flowbench: Revisitingandbenchmarkingworkflow-guidedplanningforllm-based agents,2024.
+49. [9] HongshenXu,ZichenZhu,LeiPan,ZihanWang,SuZhu,DaMa,RuishengCao,LuChen,and KaiYu. Reducingtoolhallucinationviareliabilityalignment,2025.
+50. [10] ZhenZeng,WilliamWatson,NicoleCho,SabaRahimi,ShayleenReynolds,TuckerBalch,and ManuelaVeloso. Flowmind: Automaticworkflowgenerationwithllms,2024.
+
+---
+*Processed on 2025-08-07 18:52:29 UTC*
+*Processing time: 48.23 seconds*
